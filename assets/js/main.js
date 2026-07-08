@@ -47,6 +47,10 @@ const ICON_FORK =
   '<circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle>' +
   '<line x1="6" y1="8.5" x2="6" y2="15.5"></line><line x1="6" y1="10" x2="15.5" y2="6"></line>' +
   "</svg>";
+const ICON_EXTERNAL =
+  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8,7 17,7 17,16"></polyline>' +
+  "</svg>";
 
 const state = {
   repos: [],
@@ -253,6 +257,8 @@ function buildCard(repo, index = 0) {
   if (repo.language) {
     card.style.setProperty("--lang-color", LANGUAGE_COLORS[repo.language] || DEFAULT_LANGUAGE_COLOR);
   }
+  const pagesUrl = getPagesUrl(repo);
+  if (pagesUrl) card.classList.add("has-pages");
 
   const titleRow = document.createElement("div");
   titleRow.className = "card-title-row";
@@ -309,7 +315,35 @@ function buildCard(repo, index = 0) {
 
   card.appendChild(meta);
 
+  if (pagesUrl) card.appendChild(buildPagesCta(pagesUrl));
+
   return card;
+}
+
+function getPagesUrl(repo) {
+  if (!repo.has_pages) return null;
+  const homepage = (repo.homepage || "").trim();
+  if (homepage) return homepage;
+  const isUserSite = repo.name.toLowerCase() === `${GITHUB_USERNAME.toLowerCase()}.github.io`;
+  return isUserSite ? `https://${GITHUB_USERNAME}.github.io/` : `https://${GITHUB_USERNAME}.github.io/${repo.name}/`;
+}
+
+function buildPagesCta(url) {
+  const cta = document.createElement("a");
+  cta.className = "pages-cta";
+  cta.href = url;
+  cta.target = "_blank";
+  cta.rel = "noopener noreferrer";
+
+  const label = document.createElement("span");
+  label.textContent = "View live site";
+  cta.appendChild(label);
+
+  const icon = document.createElement("span");
+  icon.innerHTML = ICON_EXTERNAL; // static, hardcoded icon markup — never repo-derived content
+  cta.appendChild(icon);
+
+  return cta;
 }
 
 function makeBadge(text) {

@@ -312,6 +312,7 @@ a:hover {
 .repo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-items: start;
   gap: 18px;
   padding-bottom: 64px;
 }
@@ -345,6 +346,41 @@ a:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
   border-color: rgba(99, 102, 241, 0.35);
+}
+
+.card.has-pages {
+  padding-bottom: 56px;
+}
+
+.pages-cta,
+.pages-cta:hover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px;
+  background: var(--accent-gradient);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+}
+
+.card:hover .pages-cta,
+.card:focus-within .pages-cta {
+  transform: translateY(0);
+}
+
+@media (hover: none) {
+  .pages-cta {
+    transform: translateY(0);
+  }
 }
 
 @keyframes card-in {
