@@ -1,8 +1,14 @@
 // Change this to switch whose public GitHub projects are shown.
 const GITHUB_USERNAME = "Shubin123";
 
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const CACHE_KEY = `gh-portfolio-cache:${GITHUB_USERNAME}`;
+// GitHub's unauthenticated API allows only 60 requests/hour per visitor IP,
+// and conditional (ETag) requests still consume that quota even on a 304 —
+// so the only way to stay efficient is to avoid the network call entirely
+// when cached data is still fresh.
+const REPOS_CACHE_KEY = `gh-portfolio-repos:${GITHUB_USERNAME}`;
+const REPOS_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — new repos show up within this window
+const PROFILE_CACHE_KEY = `gh-portfolio-profile:${GITHUB_USERNAME}`;
+const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — avatar/bio/name rarely change
 
 const LANGUAGE_COLORS = {
   JavaScript: "#f1e05a",
