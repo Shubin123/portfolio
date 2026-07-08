@@ -68,7 +68,10 @@ const state = {
 const els = {
   grid: document.getElementById("repo-grid"),
   status: document.getElementById("status"),
+  refreshBtn: document.getElementById("refresh-btn"),
+  refreshLabel: document.getElementById("refresh-label"),
   count: document.getElementById("repo-count"),
+  favicon: document.getElementById("favicon"),
   search: document.getElementById("search"),
   sort: document.getElementById("sort"),
   showForks: document.getElementById("show-forks"),
@@ -102,15 +105,21 @@ function bindControls() {
     state.showForks = e.target.checked;
     render();
   });
+  els.refreshBtn.addEventListener("click", () => loadRepos(true));
 }
 
 async function loadProfile() {
+  const cached = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
+  if (cached) renderProfile(cached.data);
+  if (cached && cached.isFresh) return; // fresh — skip the network call
+
   try {
     const profile = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}`);
     renderProfile(profile);
+    writeCache(PROFILE_CACHE_KEY, profile);
   } catch {
     // Non-fatal — the repo grid is the important part, profile header can stay minimal.
-    els.displayName.textContent = GITHUB_USERNAME;
+    if (!cached) els.displayName.textContent = GITHUB_USERNAME;
   }
 }
 
@@ -119,6 +128,7 @@ function renderProfile(profile) {
     els.avatar.src = profile.avatar_url;
     els.avatar.alt = `${profile.login} avatar`;
     els.avatarRing.hidden = false;
+    els.favicon.href = faviconUrl(profile.avatar_url);
   }
   els.displayName.textContent = profile.name || profile.login;
   els.bio.textContent = profile.bio || "";
@@ -136,27 +146,52 @@ function renderProfile(profile) {
   els.profileLink.href = profile.html_url || els.profileLink.href;
 }
 
-async function loadRepos() {
-  const cached = readCache();
+function faviconUrl(avatarUrl) {
+  const sep = avatarUrl.includes("?") ? "&" : "?";
+  return `${avatarUrl}${sep}s=64`; // request a small size — this is just a favicon
+}
+
+async function loadRepos(force = false) {
+  const cached = readCache(REPOS_CACHE_KEY, REPOS_CACHE_TTL_MS);
   if (cached) {
     state.repos = cached.data;
     render();
-    setStatus(`Showing cached data from ${relativeTime(new Date(cached.timestamp).toISOString())}, refreshing…`);
+    setLastUpdated(cached.timestamp);
   }
+
+  if (cached && cached.isFresh && !force) {
+    return; // fresh cache — skip the network call to stay within GitHub's unauthenticated rate limit
+  }
+
+  if (!cached) setStatus("Loading projects…");
+  setRefreshing(true);
 
   try {
     const fresh = await fetchAllRepos();
     state.repos = fresh;
-    writeCache(fresh);
+    const now = Date.now();
+    writeCache(REPOS_CACHE_KEY, fresh);
     render();
-    setStatus(`Live from GitHub, updated ${relativeTime(new Date().toISOString())}`);
+    setLastUpdated(now);
   } catch (err) {
     if (cached) {
-      setStatus(`Couldn't refresh (${err.message}) — showing cached data from ${relativeTime(new Date(cached.timestamp).toISOString())}`);
+      setStatus(`Couldn't refresh (${err.message}) — last updated ${relativeTime(new Date(cached.timestamp).toISOString())}`);
     } else {
       renderError(err);
     }
+  } finally {
+    setRefreshing(false);
   }
+}
+
+function setLastUpdated(timestamp) {
+  setStatus(`Last updated ${relativeTime(new Date(timestamp).toISOString())}`);
+}
+
+function setRefreshing(isRefreshing) {
+  els.refreshBtn.disabled = isRefreshing;
+  els.refreshBtn.classList.toggle("is-refreshing", isRefreshing);
+  els.refreshLabel.textContent = isRefreshing ? "Refreshing…" : "Refresh";
 }
 
 async function fetchAllRepos() {
@@ -188,21 +223,20 @@ async function fetchJSON(url) {
   return res.json();
 }
 
-function readCache() {
+function readCache(key, ttlMs) {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) return null;
-    return parsed;
+    return { ...parsed, isFresh: Date.now() - parsed.timestamp <= ttlMs };
   } catch {
     return null;
   }
 }
 
-function writeCache(data) {
+function writeCache(key, data) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+    localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
   } catch {
     // Storage unavailable (e.g. private browsing) — safe to ignore, live fetch still works.
   }
@@ -394,7 +428,7 @@ function renderError(err) {
   const retry = document.createElement("button");
   retry.className = "retry-button";
   retry.textContent = "Retry";
-  retry.addEventListener("click", loadRepos);
+  retry.addEventListener("click", () => loadRepos(true));
   wrap.appendChild(retry);
 
   els.grid.appendChild(wrap);

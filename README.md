@@ -15,11 +15,15 @@ ones, with nothing to keep in sync.
 Because the GitHub REST API only returns public repositories for
 unauthenticated requests, the page can never expose private projects.
 
-A successful fetch is cached in `localStorage` for 10 minutes so repeat visits
-render instantly and stay well under GitHub's unauthenticated rate limit (60
-requests/hour per visitor IP), then refreshes in the background. If a refresh
-fails (e.g. rate limited), the page falls back to the cached copy and shows
-when it's from.
+Results are cached in `localStorage` — repos for 30 minutes, profile info for
+24 hours (it rarely changes) — and while the cache is fresh, page loads skip
+the network call entirely. This matters because GitHub's unauthenticated API
+allows only 60 requests/hour per visitor IP, and that quota is consumed even
+by conditional (ETag) requests that return a 304, so caching is the only real
+lever. A "Refresh" link next to the status line lets a visitor force an
+immediate check without waiting out the cache window. If a refresh fails
+(e.g. rate limited), the page falls back to the cached copy and says how old
+it is.
 
 ## Changing the GitHub account
 
