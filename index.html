@@ -5,30 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shubin123 — Projects</title>
   <meta name="description" content="A live, auto-updating showcase of public GitHub projects." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%3C/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
   <header class="site-header">
     <div class="container profile" id="profile">
-      <img class="avatar" id="avatar" alt="" hidden />
+      <div class="avatar-ring" id="avatar-ring" hidden>
+        <img class="avatar" id="avatar" alt="" />
+      </div>
       <div class="profile-text">
         <h1 id="display-name">Loading…</h1>
         <p id="bio" class="bio"></p>
         <div class="profile-stats" id="profile-stats"></div>
       </div>
-      <a id="profile-link" class="github-link" href="https://github.com/Shubin123" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a>
+      <a id="profile-link" class="github-link" href="https://github.com/Shubin123" target="_blank" rel="noopener noreferrer">
+        <span>View on GitHub</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="7" y1="17" x2="17" y2="7"></line>
+          <polyline points="8,7 17,7 17,16"></polyline>
+        </svg>
+      </a>
     </div>
   </header>
 
   <main class="container">
+    <div class="section-heading">
+      <p class="eyebrow">Projects</p>
+      <h2>A live feed of my public repositories</h2>
+    </div>
+
     <div class="controls" role="search">
-      <input
-        id="search"
-        type="search"
-        placeholder="Search projects by name, description, or topic…"
-        aria-label="Search projects"
-      />
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="6"></circle>
+          <line x1="20" y1="20" x2="15.5" y2="15.5"></line>
+        </svg>
+        <input
+          id="search"
+          type="search"
+          placeholder="Search projects by name, description, or topic…"
+          aria-label="Search projects"
+        />
+      </div>
       <label class="control-inline">
         Sort by
         <select id="sort" aria-label="Sort projects">
@@ -38,8 +59,9 @@
           <option value="name">Name (A–Z)</option>
         </select>
       </label>
-      <label class="control-inline checkbox">
+      <label class="switch">
         <input type="checkbox" id="show-forks" />
+        <span class="switch-track"><span class="switch-thumb"></span></span>
         Show forks
       </label>
     </div>

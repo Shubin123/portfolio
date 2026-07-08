@@ -38,6 +38,16 @@ const LANGUAGE_COLORS = {
 };
 const DEFAULT_LANGUAGE_COLOR = "#8b949e";
 
+const ICON_STAR =
+  '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">' +
+  '<polygon points="12,2 14.25,8.91 21.51,8.91 15.63,13.18 17.88,20.09 12,15.82 6.12,20.09 8.37,13.18 2.49,8.91 9.75,8.91"/>' +
+  "</svg>";
+const ICON_FORK =
+  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+  '<circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle>' +
+  '<line x1="6" y1="8.5" x2="6" y2="15.5"></line><line x1="6" y1="10" x2="15.5" y2="6"></line>' +
+  "</svg>";
+
 const state = {
   repos: [],
   search: "",
@@ -52,6 +62,7 @@ const els = {
   search: document.getElementById("search"),
   sort: document.getElementById("sort"),
   showForks: document.getElementById("show-forks"),
+  avatarRing: document.getElementById("avatar-ring"),
   avatar: document.getElementById("avatar"),
   displayName: document.getElementById("display-name"),
   bio: document.getElementById("bio"),
@@ -97,7 +108,7 @@ function renderProfile(profile) {
   if (profile.avatar_url) {
     els.avatar.src = profile.avatar_url;
     els.avatar.alt = `${profile.login} avatar`;
-    els.avatar.hidden = false;
+    els.avatarRing.hidden = false;
   }
   els.displayName.textContent = profile.name || profile.login;
   els.bio.textContent = profile.bio || "";
@@ -106,11 +117,11 @@ function renderProfile(profile) {
     [profile.public_repos, "public repos"],
     [profile.followers, "followers"],
   ];
-  stats.forEach(([value, label], i) => {
-    if (i > 0) els.profileStats.append(" · ");
-    const span = document.createElement("span");
-    span.textContent = `${value} ${label}`;
-    els.profileStats.appendChild(span);
+  stats.forEach(([value, label]) => {
+    const pill = document.createElement("span");
+    pill.className = "stat-pill";
+    pill.textContent = `${value.toLocaleString()} ${label}`;
+    els.profileStats.appendChild(pill);
   });
   els.profileLink.href = profile.html_url || els.profileLink.href;
 }
@@ -231,13 +242,17 @@ function render() {
     return;
   }
 
-  filtered.forEach((repo) => els.grid.appendChild(buildCard(repo)));
+  filtered.forEach((repo, i) => els.grid.appendChild(buildCard(repo, i)));
   els.count.textContent = `${filtered.length} project${filtered.length === 1 ? "" : "s"}`;
 }
 
-function buildCard(repo) {
+function buildCard(repo, index = 0) {
   const card = document.createElement("article");
   card.className = "card";
+  card.style.animationDelay = `${Math.min(index, 20) * 35}ms`;
+  if (repo.language) {
+    card.style.setProperty("--lang-color", LANGUAGE_COLORS[repo.language] || DEFAULT_LANGUAGE_COLOR);
+  }
 
   const titleRow = document.createElement("div");
   titleRow.className = "card-title-row";
@@ -288,9 +303,9 @@ function buildCard(repo) {
     meta.appendChild(langEl);
   }
 
-  meta.appendChild(makeMetaItem(`★ ${repo.stargazers_count}`));
-  meta.appendChild(makeMetaItem(`⑂ ${repo.forks_count}`));
-  meta.appendChild(makeMetaItem(`Updated ${relativeTime(repo.pushed_at)}`));
+  meta.appendChild(makeMetaItem(ICON_STAR, repo.stargazers_count.toLocaleString()));
+  meta.appendChild(makeMetaItem(ICON_FORK, repo.forks_count.toLocaleString()));
+  meta.appendChild(makeMetaItem(null, `Updated ${relativeTime(repo.pushed_at)}`));
 
   card.appendChild(meta);
 
@@ -304,10 +319,17 @@ function makeBadge(text) {
   return badge;
 }
 
-function makeMetaItem(text) {
+function makeMetaItem(iconSvg, text) {
   const span = document.createElement("span");
   span.className = "meta-item";
-  span.textContent = text;
+  if (iconSvg) {
+    const icon = document.createElement("span");
+    icon.innerHTML = iconSvg; // static, hardcoded icon markup — never repo-derived content
+    span.appendChild(icon);
+  }
+  const label = document.createElement("span");
+  label.textContent = text;
+  span.appendChild(label);
   return span;
 }
 
