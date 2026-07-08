@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shubin123 — Projects</title>
+  <meta name="description" content="A live, auto-updating showcase of public GitHub projects." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%3C/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container profile" id="profile">
+      <img class="avatar" id="avatar" alt="" hidden />
+      <div class="profile-text">
+        <h1 id="display-name">Loading…</h1>
+        <p id="bio" class="bio"></p>
+        <div class="profile-stats" id="profile-stats"></div>
+      </div>
+      <a id="profile-link" class="github-link" href="https://github.com/Shubin123" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="controls" role="search">
+      <input
+        id="search"
+        type="search"
+        placeholder="Search projects by name, description, or topic…"
+        aria-label="Search projects"
+      />
+      <label class="control-inline">
+        Sort by
+        <select id="sort" aria-label="Sort projects">
+          <option value="updated">Recently pushed</option>
+          <option value="created">Recently created</option>
+          <option value="stars">Most stars</option>
+          <option value="name">Name (A–Z)</option>
+        </select>
+      </label>
+      <label class="control-inline checkbox">
+        <input type="checkbox" id="show-forks" />
+        Show forks
+      </label>
+    </div>
+
+    <div class="status-row">
+      <span id="status" aria-live="polite">Loading projects…</span>
+      <span id="repo-count"></span>
+    </div>
+
+    <section id="repo-grid" class="repo-grid" aria-live="polite"></section>
+
+    <noscript>
+      <p>
+        JavaScript is required to load projects live from GitHub.
+        View the profile directly at
+        <a href="https://github.com/Shubin123">github.com/Shubin123</a>.
+      </p>
+    </noscript>
+  </main>
+
+  <footer class="site-footer container">
+    <p>
+      Data is fetched live from the public GitHub REST API on every page load —
+      no build step, no backend, nothing to keep in sync.
+    </p>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
