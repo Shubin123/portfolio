@@ -1,4 +1,4 @@
-# Portfolio
+# Portfolio | https://shubin123.github.io/portfolio/
 
 A static, single-page project showcase that pulls public GitHub repositories
 live at page load. There's no build step, no backend, and no database — the
