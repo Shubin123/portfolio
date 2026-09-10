@@ -60,6 +60,8 @@ const ICON_EXTERNAL =
 
 const state = {
   repos: [],
+  reposLoaded: false,
+  profile: null,
   search: "",
   sort: "updated",
   showForks: false,
@@ -71,7 +73,6 @@ const els = {
   refreshBtn: document.getElementById("refresh-btn"),
   refreshLabel: document.getElementById("refresh-label"),
   count: document.getElementById("repo-count"),
-  favicon: document.getElementById("favicon"),
   search: document.getElementById("search"),
   sort: document.getElementById("sort"),
   showForks: document.getElementById("show-forks"),
@@ -128,33 +129,42 @@ function renderProfile(profile) {
     els.avatar.src = profile.avatar_url;
     els.avatar.alt = `${profile.login} avatar`;
     els.avatarRing.hidden = false;
-    els.favicon.href = faviconUrl(profile.avatar_url);
   }
   els.displayName.textContent = profile.name || profile.login;
   els.bio.textContent = profile.bio || "";
-  els.profileStats.textContent = "";
-  const stats = [
-    [profile.public_repos, "public repos"],
-    [profile.followers, "followers"],
-  ];
-  stats.forEach(([value, label]) => {
+  state.profile = profile;
+  renderRepoStats();
+  els.profileLink.href = profile.html_url || els.profileLink.href;
+}
+
+function publicRepos() {
+  return state.repos.filter((repo) => !repo.private);
+}
+
+function renderRepoStats() {
+  els.profileStats.replaceChildren();
+  const repos = publicRepos();
+  const forks = repos.filter((repo) => repo.fork).length;
+  const stats = state.reposLoaded ? [
+    [repos.length, "public repos"],
+    [repos.length - forks, "non-forks"],
+    [forks, "forks"],
+  ] : [];
+  if (Number.isFinite(state.profile?.followers)) stats.push([state.profile.followers, "followers"]);
+  for (const [value, label] of stats) {
     const pill = document.createElement("span");
     pill.className = "stat-pill";
     pill.textContent = `${value.toLocaleString()} ${label}`;
     els.profileStats.appendChild(pill);
-  });
-  els.profileLink.href = profile.html_url || els.profileLink.href;
-}
-
-function faviconUrl(avatarUrl) {
-  const sep = avatarUrl.includes("?") ? "&" : "?";
-  return `${avatarUrl}${sep}s=64`; // request a small size — this is just a favicon
+  }
+  document.getElementById("fork-label").textContent = `Include forks${state.reposLoaded ? ` (${forks})` : ""}`;
 }
 
 async function loadRepos(force = false) {
   const cached = readCache(REPOS_CACHE_KEY, REPOS_CACHE_TTL_MS);
   if (cached) {
     state.repos = cached.data;
+    state.reposLoaded = true;
     render();
     setLastUpdated(cached.timestamp);
   }
@@ -169,6 +179,7 @@ async function loadRepos(force = false) {
   try {
     const fresh = await fetchAllRepos();
     state.repos = fresh;
+    state.reposLoaded = true;
     const now = Date.now();
     writeCache(REPOS_CACHE_KEY, fresh);
     render();
@@ -228,6 +239,8 @@ function readCache(key, ttlMs) {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
+    if (!Number.isFinite(parsed.timestamp) || !parsed.data) return null;
+    if (key === REPOS_CACHE_KEY && !Array.isArray(parsed.data)) return null;
     return { ...parsed, isFresh: Date.now() - parsed.timestamp <= ttlMs };
   } catch {
     return null;
@@ -275,19 +288,20 @@ function render() {
   const filtered = filterAndSort(state.repos);
   els.grid.innerHTML = "";
 
-  if (state.repos.length === 0) return; // still loading, skeleton is showing
+  renderRepoStats();
+  const repos = publicRepos();
+  const forks = repos.filter((repo) => repo.fork).length;
+  els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
 
   if (filtered.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
-    empty.textContent = "No projects match your filters.";
+    empty.textContent = repos.length ? "No projects match your filters." : "No public repositories yet.";
     els.grid.appendChild(empty);
-    els.count.textContent = "";
     return;
   }
 
   filtered.forEach((repo, i) => els.grid.appendChild(buildCard(repo, i)));
-  els.count.textContent = `${filtered.length} project${filtered.length === 1 ? "" : "s"}`;
 }
 
 function buildCard(repo, index = 0) {
@@ -309,9 +323,20 @@ function buildCard(repo, index = 0) {
   link.rel = "noopener noreferrer";
   link.className = "card-title";
   link.textContent = repo.name;
-  titleRow.appendChild(link);
+  const icon = document.createElement("img");
+  icon.className = "project-icon";
+  icon.src = projectIconUrl(repo.name);
+  icon.alt = "";
+  icon.width = 48;
+  icon.height = 48;
+  icon.loading = "lazy";
+  titleRow.appendChild(icon);
+  const heading = document.createElement("h3");
+  heading.className = "card-heading";
+  heading.appendChild(link);
+  titleRow.appendChild(heading);
 
-  if (repo.fork) titleRow.appendChild(makeBadge("Fork"));
+  if (repo.fork) { const badge = makeBadge("Fork"); badge.title = "A copy of an existing repository"; titleRow.appendChild(badge); }
   if (repo.archived) titleRow.appendChild(makeBadge("Archived"));
 
   card.appendChild(titleRow);
@@ -349,8 +374,8 @@ function buildCard(repo, index = 0) {
     meta.appendChild(langEl);
   }
 
-  meta.appendChild(makeMetaItem(ICON_STAR, repo.stargazers_count.toLocaleString()));
-  meta.appendChild(makeMetaItem(ICON_FORK, repo.forks_count.toLocaleString()));
+  meta.appendChild(makeMetaItem(ICON_STAR, `${repo.stargazers_count.toLocaleString()} stars`));
+  meta.appendChild(makeMetaItem(ICON_FORK, `${repo.forks_count.toLocaleString()} forks of this repo`));
   meta.appendChild(makeMetaItem(null, `Updated ${relativeTime(repo.pushed_at)}`));
 
   card.appendChild(meta);
@@ -362,8 +387,8 @@ function buildCard(repo, index = 0) {
 
 function getPagesUrl(repo) {
   if (!repo.has_pages) return null;
-  const homepage = (repo.homepage || "").trim();
-  if (homepage) return homepage;
+  // Ignore repo.homepage: it often points at a demo video or a mirror, not the
+  // Pages deployment this card links to.
   const isUserSite = repo.name.toLowerCase() === `${GITHUB_USERNAME.toLowerCase()}.github.io`;
   return isUserSite ? `https://${GITHUB_USERNAME}.github.io/` : `https://${GITHUB_USERNAME}.github.io/${repo.name}/`;
 }

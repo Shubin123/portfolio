@@ -1,0 +1,58 @@
+{
+  "aimjs": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "classifier": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "cubeSolver": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "Food_MODEL": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "gobot": {
+    "source": "docs/app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "kokorojs": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "midi": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "ml-loop": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "netgraph": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "vslam_gym": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "whyfightree": {
+    "source": "public/app-icon.svg",
+    "deployed": "app-icon.svg"
+  },
+  "avr_visual": {
+    "source": "public/favicon.svg",
+    "deployed": "favicon.svg"
+  },
+  "stonk": {
+    "source": "web/favicon.svg",
+    "deployed": "favicon.svg"
+  },
+  "portfolio": {
+    "source": "assets/icons/portfolio.svg",
+    "deployed": "assets/icons/portfolio.svg"
+  }
+}
