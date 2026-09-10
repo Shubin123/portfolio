@@ -46,6 +46,16 @@ test('all project marks are local SVGs and Pages links stay on the actual deploy
   const kokoro = page.locator('.card').filter({ has: page.getByRole('link', { name: 'kokorojs', exact: true }) });
   await expect(kokoro.locator('.pages-cta')).toHaveAttribute('href', 'https://Shubin123.github.io/kokorojs/');
 });
+test('counts on a card read as singular or plural, and never contradict the badges', async ({ page }) => {
+  await open(page);
+  const card = name => page.locator('.card').filter({ has: page.getByRole('link', { name, exact: true }) });
+  await page.getByLabel('Include forks (5)').check(); // the only 1-star fixture is a fork
+  await expect(card('amazon-scraper').locator('.card-meta')).toContainText('1 star');
+  await expect(card('amazon-scraper').locator('.card-meta')).not.toContainText('1 stars');
+  await expect(card('amazon-scraper').locator('.card-meta')).toContainText('2 forks of this repo');
+  await expect(card('aimjs').locator('.card-meta')).toContainText('0 stars');
+});
+
 test('wider viewports add columns and align every row, including zoom-out-sized viewports', async ({ page }) => {
   await open(page);
   let previous = 0;

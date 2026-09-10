@@ -374,8 +374,10 @@ function buildCard(repo, index = 0) {
     meta.appendChild(langEl);
   }
 
-  meta.appendChild(makeMetaItem(ICON_STAR, `${repo.stargazers_count.toLocaleString()} stars`));
-  meta.appendChild(makeMetaItem(ICON_FORK, `${repo.forks_count.toLocaleString()} forks of this repo`));
+  meta.appendChild(makeMetaItem(ICON_STAR, countLabel(repo.stargazers_count, "star")));
+  // "of this repo" separates a repo's own fork count from the Fork badge, which
+  // says this repo is itself a fork of someone else's.
+  meta.appendChild(makeMetaItem(ICON_FORK, `${countLabel(repo.forks_count, "fork")} of this repo`));
   meta.appendChild(makeMetaItem(null, `Updated ${relativeTime(repo.pushed_at)}`));
 
   card.appendChild(meta);
@@ -416,6 +418,10 @@ function makeBadge(text) {
   badge.className = "badge";
   badge.textContent = text;
   return badge;
+}
+
+function countLabel(value, noun) {
+  return `${value.toLocaleString()} ${noun}${value === 1 ? "" : "s"}`;
 }
 
 function makeMetaItem(iconSvg, text) {
