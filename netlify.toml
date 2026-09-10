@@ -1,10 +1,4 @@
 [[redirects]]
-  from = "/tts"
-  to = "/tts/"
-  status = 301
-  force = true
-
-[[redirects]]
   from = "/tts/*"
   to = "https://shubin123.github.io/kokorojs/:splat"
   status = 200
