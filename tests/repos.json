@@ -1,0 +1,610 @@
+[
+  {
+    "default_branch": "main",
+    "description": "Object Detection and Cursor Control using Javascript.",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "https://shubin123.github.io/aimjs/",
+    "name": "aimjs",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/aimjs",
+    "language": "JavaScript",
+    "stargazers_count": 0,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": "A simple web scraper to extract Product Data and Pricing from Amazon",
+    "fork": true,
+    "has_pages": false,
+    "homepage": "https://www.scrapehero.com/tutorial-how-to-scrape-amazon-product-details-using-python-and-selectorlib/",
+    "name": "amazon-scraper",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/amazon-scraper",
+    "language": "JavaScript",
+    "stargazers_count": 1,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "atmel, atmega, arduino asm visualizer with interrupt support",
+    "fork": false,
+    "has_pages": true,
+    "homepage": null,
+    "name": "avr_visual",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/avr_visual",
+    "language": "JavaScript",
+    "stargazers_count": 2,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "graphql for commerce platform",
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "backendgraphql",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/backendgraphql",
+    "language": "JavaScript",
+    "stargazers_count": 3,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "Browser-side apple quality classifier: a Vision Transformer fine-tuned on the Fresh and Rotten Fruits dataset, converted to TensorFlow.js and run client-side with IndexedDB weight caching.",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "",
+    "name": "classifier",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/classifier",
+    "language": "JavaScript",
+    "stargazers_count": 4,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "graphical rubik's solver with three.js",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "",
+    "name": "cubeSolver",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/cubeSolver",
+    "language": "JavaScript",
+    "stargazers_count": 5,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "web dash board for performance",
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "dashtop",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/dashtop",
+    "language": "JavaScript",
+    "stargazers_count": 6,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": "python 3.7 django 2.1.4",
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "Django-polls-app",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/Django-polls-app",
+    "language": "JavaScript",
+    "stargazers_count": 7,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "uses lightweight ai models to count calories of food in pictures.",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "https://shubin123.github.io/Food_MODEL/",
+    "name": "Food_MODEL",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/Food_MODEL",
+    "language": "JavaScript",
+    "stargazers_count": 8,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "c++ game with glfw renderer using opengl lib with imgui",
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "GameGLWFopengl",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/GameGLWFopengl",
+    "language": "JavaScript",
+    "stargazers_count": 9,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": null,
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "gemini-browser",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/gemini-browser",
+    "language": "JavaScript",
+    "stargazers_count": 10,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "An open-source AI agent that brings the power of Gemini directly into your terminal.",
+    "fork": true,
+    "has_pages": false,
+    "homepage": "",
+    "name": "gemini-cli",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/gemini-cli",
+    "language": "JavaScript",
+    "stargazers_count": 11,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "Dual-headed ResNet Go engine with MCTS, GTP, self-play training, and a WebGPU-accelerated browser demo",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "https://shubin123.github.io/gobot",
+    "name": "gobot",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/gobot",
+    "language": "JavaScript",
+    "stargazers_count": 12,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "kokoro text to speech using javascript",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "https://shubinwang.com/tts/",
+    "name": "kokorojs",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/kokorojs",
+    "language": "JavaScript",
+    "stargazers_count": 13,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "Ultimate Synthesia Online: a polyphonic Web Audio synthesizer with dual oscillators, sub and noise, ADSR, multimode filter, Web MIDI input, a beat-quantised four-slot looper and falling-note display.",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "",
+    "name": "midi",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/midi",
+    "language": "JavaScript",
+    "stargazers_count": 14,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "route planning (traveling salesman problem)",
+    "fork": false,
+    "has_pages": true,
+    "homepage": null,
+    "name": "ml-loop",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/ml-loop",
+    "language": "JavaScript",
+    "stargazers_count": 15,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "windump and tcpdump visualizer",
+    "fork": false,
+    "has_pages": true,
+    "homepage": null,
+    "name": "netgraph",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/netgraph",
+    "language": "JavaScript",
+    "stargazers_count": 16,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": "Firmware and research tools for Nordic Semiconductor nRF24LU1+ based USB dongles and breakout boards.",
+    "fork": true,
+    "has_pages": false,
+    "homepage": null,
+    "name": "nrf-research-firmware",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/nrf-research-firmware",
+    "language": "JavaScript",
+    "stargazers_count": 17,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "Open Multi Agent -- a harness for running tasks across multiple LLM subscriptions with invariant retry, criteria-driven evaluation, and graceful degradation",
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "oma-harness",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/oma-harness",
+    "language": "JavaScript",
+    "stargazers_count": 18,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": "A Set of examples for using OpenGL on C++ (For Educational Purposes)",
+    "fork": true,
+    "has_pages": false,
+    "homepage": "",
+    "name": "OpenGL-Examples",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/OpenGL-Examples",
+    "language": "JavaScript",
+    "stargazers_count": 19,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "aggregation of projects",
+    "fork": false,
+    "has_pages": true,
+    "homepage": null,
+    "name": "portfolio",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/portfolio",
+    "language": "JavaScript",
+    "stargazers_count": 20,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "web crawler in ruby",
+    "fork": false,
+    "has_pages": false,
+    "homepage": "https://replit.com/@Shubin123/ruby-web-crawler?v=1",
+    "name": "ruby-web-crawler",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/ruby-web-crawler",
+    "language": "JavaScript",
+    "stargazers_count": 21,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "Config files for my GitHub profile.",
+    "fork": false,
+    "has_pages": false,
+    "homepage": "https://github.com/Shubin123",
+    "name": "Shubin123",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/Shubin123",
+    "language": "JavaScript",
+    "stargazers_count": 22,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": "Historical market replay, paper trading, causal bots, and a play-credit arcade.",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "https://shubin123.github.io/stonk/",
+    "name": "stonk",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/stonk",
+    "language": "JavaScript",
+    "stargazers_count": 23,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "mybinder testing",
+    "fork": true,
+    "has_pages": false,
+    "homepage": null,
+    "name": "symmetrical-book",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/symmetrical-book",
+    "language": "JavaScript",
+    "stargazers_count": 24,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "terminal on the macbook touchbar",
+    "fork": false,
+    "has_pages": false,
+    "homepage": "",
+    "name": "terminalbar",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/terminalbar",
+    "language": "JavaScript",
+    "stargazers_count": 25,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "master",
+    "description": "place tiles with pygame",
+    "fork": false,
+    "has_pages": false,
+    "homepage": "https://replit.com/@Shubin123/tile-editor?v=1",
+    "name": "tile-editor",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/tile-editor",
+    "language": "JavaScript",
+    "stargazers_count": 26,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "screen mirroring on macbook touchbar.",
+    "fork": false,
+    "has_pages": false,
+    "homepage": "",
+    "name": "viewbar",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/viewbar",
+    "language": "JavaScript",
+    "stargazers_count": 27,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": "Vision-driven locomotion demo: a car steers itself around a three.js track from the rendered image, using ONNX Runtime Web on WebGPU for steering regression and YOLOv8 detection.",
+    "fork": false,
+    "has_pages": true,
+    "homepage": "https://shubin123.github.io/vslam_gym/",
+    "name": "vslam_gym",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/vslam_gym",
+    "language": "JavaScript",
+    "stargazers_count": 28,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": null,
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "vul",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/vul",
+    "language": "JavaScript",
+    "stargazers_count": 29,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": null,
+    "fork": false,
+    "has_pages": true,
+    "homepage": null,
+    "name": "whyfightree",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/whyfightree",
+    "language": "JavaScript",
+    "stargazers_count": 30,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "default_branch": "main",
+    "description": null,
+    "fork": false,
+    "has_pages": false,
+    "homepage": null,
+    "name": "zom",
+    "private": false,
+    "html_url": "https://github.com/Shubin123/zom",
+    "language": "JavaScript",
+    "stargazers_count": 31,
+    "forks_count": 2,
+    "topics": [
+      "browser",
+      "project"
+    ],
+    "pushed_at": "2026-09-09T00:00:00Z",
+    "created_at": "2024-01-01T00:00:00Z"
+  }
+]

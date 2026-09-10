@@ -1,0 +1,12 @@
+{
+  "name": "shubin-portfolio",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "check:icons": "python3 scripts/check-icons.py",
+    "test:live": "LIVE=1 playwright test tests/live-sites.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

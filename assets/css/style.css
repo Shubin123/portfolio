@@ -74,9 +74,10 @@ a:hover {
 }
 
 .container {
-  max-width: 1040px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(20px, 4vw, 80px);
 }
 
 .site-header {
@@ -360,8 +361,8 @@ a:hover {
 
 .repo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  align-items: stretch;
   gap: 18px;
   padding-bottom: 64px;
 }
@@ -453,7 +454,8 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  min-height: 48px;
 }
 
 .card-title {
@@ -504,7 +506,7 @@ a:hover {
   gap: 14px;
   font-size: 0.78rem;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: auto;
   font-variant-numeric: tabular-nums;
 }
 
@@ -584,3 +586,32 @@ a:hover {
   color: var(--text-muted);
   font-size: 0.82rem;
 }
+
+/* Fluid width adds columns as the CSS viewport grows, including browser zoom-out. */
+.project-icon { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 12px; }
+.card-heading { margin: 0; flex: 1; min-width: 0; font-size: inherit; }
+.card-title { overflow-wrap: anywhere; }
+.card { min-width: 0; }
+.card-desc { min-height: 2.75em; flex: none; }
+.card-meta { padding-top: 8px; gap: 8px 12px; }
+.topics { min-height: 28px; }
+.count-explanation { margin: 10px 0 0; font-size: .8rem; color: var(--text-muted); }
+.status-row { gap: 12px; flex-wrap: wrap; }
+.status-left { flex-wrap: wrap; }
+#repo-count { font-variant-numeric: tabular-nums; }
+.section-heading { position: relative; padding-left: 64px; }
+.section-mark { position: absolute; left: 0; top: 0; border-radius: 12px; }
+.card-title-row .badge { flex: 0 0 auto; padding: 3px 6px; }
+@media (max-width: 560px) {
+  .site-header { padding-top: 28px; }
+  .profile { gap: 16px; }
+  .profile-text { min-width: 0; flex-basis: 190px; }
+  .search-wrap { min-width: min(240px, 100%); }
+  .section-heading h2 { font-size: 1.2rem; }
+  .status-row { align-items: flex-start; }
+  .repo-grid { gap: 14px; }
+}
+
+.switch { position: relative; }
+.switch input { width: 36px; height: 20px; margin: 0; left: 0; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 1; }
+.switch-track { pointer-events: none; }
