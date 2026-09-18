@@ -8,9 +8,9 @@ ones, with nothing to keep in sync.
 
 ## How it works
 
-- `index.html` — page structure (profile header, search/sort controls, project grid).
-- `assets/css/style.css` — styling, including a dark theme that follows the visitor's OS preference.
-- `assets/js/main.js` — fetches `https://api.github.com/users/<username>/repos` and `.../users/<username>` on load, then renders/filters/sorts the results client-side.
+- `index.html` — page structure (profile header, search/sort controls, project grid, gists widget).
+- `assets/css/style.css` — styling, including a dark theme that follows the visitor's OS preference and responsive pane transitions.
+- `assets/js/main.js` — fetches GitHub repositories, profile, and gists on load, then handles interactive sorting, live filtering, and widget pulldown client-side.
 - `assets/icons/*.svg` + `assets/js/icons.js` — one mark per project (see below).
 
 The header counts a repository once: **public repos = non-forks + forks**, all

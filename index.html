@@ -87,16 +87,54 @@
         <section id="repo-grid" class="repo-grid" aria-live="polite"></section>
       </section>
 
-      <aside class="gists-widget" aria-labelledby="gists-heading">
+      <aside class="gists-widget" id="gists-widget" aria-labelledby="gists-heading">
         <div class="gists-widget-header">
-          <div>
-            <p class="eyebrow">GitHub</p>
-            <h2 id="gists-heading">Latest gists</h2>
-          </div>
+          <button
+            type="button"
+            id="gists-toggle"
+            class="gists-toggle-btn"
+            aria-expanded="true"
+            aria-controls="gists-body"
+            title="Collapse gists widget to expand projects pane"
+          >
+            <span class="gists-toggle-title">
+              <span class="eyebrow">GitHub</span>
+              <span class="gists-heading-row">
+                <h2 id="gists-heading">Latest gists</h2>
+                <span id="gists-count-badge" class="gists-count-badge" hidden></span>
+              </span>
+            </span>
+            <span class="gists-toggle-arrow" aria-hidden="true">
+              <svg class="gists-chevron-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
           <a id="gists-link" class="gists-link" href="https://gist.github.com/Shubin123" target="_blank" rel="noopener noreferrer">View all</a>
         </div>
-        <p id="gists-status" class="gists-status" aria-live="polite">Loading gists…</p>
-        <ul id="gists-list" class="gists-list" aria-live="polite"></ul>
+
+        <div id="gists-body" class="gists-body">
+          <div class="gists-filter-wrap">
+            <svg class="gists-search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="6"></circle>
+              <line x1="20" y1="20" x2="15.5" y2="15.5"></line>
+            </svg>
+            <input
+              id="gists-filter"
+              type="search"
+              placeholder="Filter gists by name, file, or description…"
+              aria-label="Filter gists"
+            />
+            <button type="button" id="gists-filter-clear" class="gists-filter-clear" aria-label="Clear gist filter" hidden>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <p id="gists-status" class="gists-status" aria-live="polite">Loading gists…</p>
+          <ul id="gists-list" class="gists-list" aria-live="polite"></ul>
+        </div>
       </aside>
     </div>
 
