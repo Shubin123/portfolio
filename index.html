@@ -33,13 +33,15 @@
   </header>
 
   <main class="container">
-    <div class="section-heading">
-      <img class="section-mark" src="assets/icons/portfolio.svg" alt="" width="48" height="48" />
-      <p class="eyebrow">Projects</p>
-      <h2>A live feed of my public repositories</h2>
-    </div>
+    <div class="content-layout">
+      <section class="projects-panel" aria-labelledby="projects-heading">
+        <div class="section-heading">
+          <img class="section-mark" src="assets/icons/portfolio.svg" alt="" width="48" height="48" />
+          <p class="eyebrow">Projects</p>
+          <h2 id="projects-heading">A live feed of my public repositories</h2>
+        </div>
 
-    <div class="controls" role="search">
+        <div class="controls" role="search">
       <div class="search-wrap">
         <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="6"></circle>
@@ -66,9 +68,9 @@
         <span class="switch-track"><span class="switch-thumb"></span></span>
         <span id="fork-label">Include forks</span>
       </label>
-    </div>
+        </div>
 
-    <div class="status-row">
+        <div class="status-row">
       <span class="status-left">
         <span id="status" aria-live="polite">Loading projects…</span>
         <button id="refresh-btn" class="refresh-btn" type="button" title="Check GitHub for new projects now">
@@ -80,9 +82,23 @@
         </button>
       </span>
       <span id="repo-count" aria-live="polite"></span>
-    </div>
+        </div>
 
-    <section id="repo-grid" class="repo-grid" aria-live="polite"></section>
+        <section id="repo-grid" class="repo-grid" aria-live="polite"></section>
+      </section>
+
+      <aside class="gists-widget" aria-labelledby="gists-heading">
+        <div class="gists-widget-header">
+          <div>
+            <p class="eyebrow">GitHub</p>
+            <h2 id="gists-heading">Latest gists</h2>
+          </div>
+          <a id="gists-link" class="gists-link" href="https://gist.github.com/Shubin123" target="_blank" rel="noopener noreferrer">View all</a>
+        </div>
+        <p id="gists-status" class="gists-status" aria-live="polite">Loading gists…</p>
+        <ul id="gists-list" class="gists-list" aria-live="polite"></ul>
+      </aside>
+    </div>
 
     <noscript>
       <p>

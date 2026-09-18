@@ -1,13 +1,29 @@
 const { test, expect } = require('@playwright/test');
 const repos = require('./repos.json');
 async function open(page) {
-  await page.route(/^https:\/\/api\.github\.com\/users\/Shubin123(?:\/repos\?.*)?$/, route => {
+  await page.route(/^https:\/\/api\.github\.com\/users\/Shubin123(?:\/(?:repos|gists)\?.*)?$/, route => {
     if (route.request().url().includes('/repos?')) return route.fulfill({ json: repos });
+    if (route.request().url().includes('/gists?')) return route.fulfill({ json: [
+      { id: 'one', description: 'Useful script', html_url: 'https://gist.github.com/Shubin123/one', updated_at: '2026-09-10T00:00:00Z', public: true, files: { 'script.js': {} } },
+      { id: 'two', description: '', html_url: 'https://gist.github.com/Shubin123/two', updated_at: '2026-09-09T00:00:00Z', public: true, files: { 'notes.md': {}, 'data.json': {} } },
+    ] });
     return route.fulfill({ json: { login: 'Shubin123', public_repos: 999, followers: 4 } });
   });
   await page.goto('./');
   await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27);
 }
+test('latest public gists are available in the visible sidebar widget', async ({ page }) => {
+  await open(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(page.locator('.gists-widget')).toBeVisible();
+  await expect(page.locator('#gists-status')).toHaveText('2 public gists');
+  await expect(page.locator('.gist-item')).toHaveCount(2);
+  await expect(page.getByRole('link', { name: 'Useful script', exact: true })).toHaveAttribute('href', 'https://gist.github.com/Shubin123/one');
+  await expect(page.locator('.gist-item').nth(1)).toContainText('notes.md');
+  await expect(page.locator('.gists-widget')).toHaveCSS('position', 'sticky');
+  await page.setViewportSize({ width: 600, height: 900 });
+  await expect(page.locator('.gists-widget')).toHaveCSS('position', 'static');
+});
 test('public total is the same snapshot as non-forks and forks, independent of profile API', async ({ page }) => {
   await open(page);
   await expect(page.locator('#profile-stats')).toContainText('32 public repos');

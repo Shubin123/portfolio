@@ -9,6 +9,9 @@ const REPOS_CACHE_KEY = `gh-portfolio-repos:${GITHUB_USERNAME}`;
 const REPOS_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — new repos show up within this window
 const PROFILE_CACHE_KEY = `gh-portfolio-profile:${GITHUB_USERNAME}`;
 const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — avatar/bio/name rarely change
+const GISTS_CACHE_KEY = `gh-portfolio-gists:${GITHUB_USERNAME}`;
+const GISTS_CACHE_TTL_MS = 30 * 60 * 1000;
+const GISTS_TO_SHOW = 5;
 
 const LANGUAGE_COLORS = {
   JavaScript: "#f1e05a",
@@ -62,6 +65,7 @@ const state = {
   repos: [],
   reposLoaded: false,
   profile: null,
+  gists: [],
   search: "",
   sort: "updated",
   showForks: false,
@@ -82,6 +86,9 @@ const els = {
   bio: document.getElementById("bio"),
   profileStats: document.getElementById("profile-stats"),
   profileLink: document.getElementById("profile-link"),
+  gistsLink: document.getElementById("gists-link"),
+  gistsList: document.getElementById("gists-list"),
+  gistsStatus: document.getElementById("gists-status"),
 };
 
 init();
@@ -91,6 +98,7 @@ function init() {
   renderSkeleton();
   loadProfile();
   loadRepos();
+  loadGists();
 }
 
 function bindControls() {
@@ -135,6 +143,55 @@ function renderProfile(profile) {
   state.profile = profile;
   renderRepoStats();
   els.profileLink.href = profile.html_url || els.profileLink.href;
+  els.gistsLink.href = profile.html_url ? `https://gist.github.com/${profile.login}` : els.gistsLink.href;
+}
+
+async function loadGists() {
+  const cached = readCache(GISTS_CACHE_KEY, GISTS_CACHE_TTL_MS);
+  if (cached) {
+    state.gists = cached.data;
+    renderGists();
+  }
+  if (cached && cached.isFresh) return;
+
+  try {
+    const gists = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`);
+    state.gists = gists;
+    writeCache(GISTS_CACHE_KEY, gists);
+    renderGists();
+  } catch {
+    if (!cached) {
+      els.gistsStatus.textContent = "Gists are unavailable right now.";
+    }
+  }
+}
+
+function renderGists() {
+  els.gistsList.replaceChildren();
+  const gists = [...state.gists]
+    .filter((gist) => gist.public !== false)
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+  els.gistsStatus.textContent = gists.length
+    ? `${gists.length} public gist${gists.length === 1 ? "" : "s"}`
+    : "No public gists yet.";
+
+  gists.slice(0, GISTS_TO_SHOW).forEach((gist) => {
+    const item = document.createElement("li");
+    item.className = "gist-item";
+    const link = document.createElement("a");
+    link.href = gist.html_url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "gist-title";
+    link.textContent = gist.description || Object.keys(gist.files || {})[0] || "Untitled gist";
+    item.appendChild(link);
+    const meta = document.createElement("span");
+    meta.className = "gist-meta";
+    const fileCount = Object.keys(gist.files || {}).length;
+    meta.textContent = `${fileCount} file${fileCount === 1 ? "" : "s"} · Updated ${relativeTime(gist.updated_at)}`;
+    item.appendChild(meta);
+    els.gistsList.appendChild(item);
+  });
 }
 
 function publicRepos() {
