@@ -9,6 +9,9 @@ const REPOS_CACHE_KEY = `gh-portfolio-repos:${GITHUB_USERNAME}`;
 const REPOS_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — new repos show up within this window
 const PROFILE_CACHE_KEY = `gh-portfolio-profile:${GITHUB_USERNAME}`;
 const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — avatar/bio/name rarely change
+const GISTS_CACHE_KEY = `gh-portfolio-gists:${GITHUB_USERNAME}`;
+const GISTS_CACHE_TTL_MS = 30 * 60 * 1000;
+const DEFAULT_GISTS_TO_SHOW = 5;
 
 const LANGUAGE_COLORS = {
   JavaScript: "#f1e05a",
@@ -62,6 +65,10 @@ const state = {
   repos: [],
   reposLoaded: false,
   profile: null,
+  gists: [],
+  gistsFilter: "",
+  gistsLimit: DEFAULT_GISTS_TO_SHOW,
+  gistsCollapsed: false,
   search: "",
   sort: "updated",
   showForks: false,
@@ -82,15 +89,27 @@ const els = {
   bio: document.getElementById("bio"),
   profileStats: document.getElementById("profile-stats"),
   profileLink: document.getElementById("profile-link"),
+  contentLayout: document.querySelector(".content-layout"),
+  gistsWidget: document.getElementById("gists-widget"),
+  gistsToggle: document.getElementById("gists-toggle"),
+  gistsBody: document.getElementById("gists-body"),
+  gistsBadge: document.getElementById("gists-count-badge"),
+  gistsFilter: document.getElementById("gists-filter"),
+  gistsFilterClear: document.getElementById("gists-filter-clear"),
+  gistsLink: document.getElementById("gists-link"),
+  gistsList: document.getElementById("gists-list"),
+  gistsStatus: document.getElementById("gists-status"),
 };
 
 init();
 
 function init() {
   bindControls();
+  bindGistsControls();
   renderSkeleton();
   loadProfile();
   loadRepos();
+  loadGists();
 }
 
 function bindControls() {
@@ -109,15 +128,69 @@ function bindControls() {
   els.refreshBtn.addEventListener("click", () => loadRepos(true));
 }
 
+function bindGistsControls() {
+  if (els.gistsToggle) {
+    els.gistsToggle.addEventListener("click", () => {
+      toggleGistsWidget();
+    });
+  }
+
+  if (els.gistsFilter) {
+    els.gistsFilter.addEventListener("input", (e) => {
+      state.gistsFilter = e.target.value;
+      if (els.gistsFilterClear) {
+        els.gistsFilterClear.hidden = !state.gistsFilter;
+      }
+      renderGists();
+    });
+  }
+
+  if (els.gistsFilterClear) {
+    els.gistsFilterClear.addEventListener("click", () => {
+      state.gistsFilter = "";
+      state.gistsLimit = DEFAULT_GISTS_TO_SHOW;
+      els.gistsFilter.value = "";
+      els.gistsFilterClear.hidden = true;
+      els.gistsFilter.focus();
+      renderGists();
+    });
+  }
+}
+
+function toggleGistsWidget(forceState) {
+  const nextCollapsed = typeof forceState === "boolean" ? forceState : !state.gistsCollapsed;
+  state.gistsCollapsed = nextCollapsed;
+
+  if (els.gistsWidget) {
+    els.gistsWidget.classList.toggle("is-collapsed", nextCollapsed);
+  }
+  if (els.contentLayout) {
+    els.contentLayout.classList.toggle("gists-collapsed", nextCollapsed);
+  }
+  if (els.gistsToggle) {
+    els.gistsToggle.setAttribute("aria-expanded", String(!nextCollapsed));
+    els.gistsToggle.title = nextCollapsed
+      ? "Pull down gists widget"
+      : "Collapse gists widget to expand projects pane";
+  }
+  if (els.gistsBody) {
+    els.gistsBody.hidden = nextCollapsed;
+  }
+}
+
 async function loadProfile() {
   const cached = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
-  if (cached) renderProfile(cached.data);
+  if (cached) {
+    renderProfile(cached.data);
+    renderGists();
+  }
   if (cached && cached.isFresh) return; // fresh — skip the network call
 
   try {
     const profile = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}`);
     renderProfile(profile);
     writeCache(PROFILE_CACHE_KEY, profile);
+    renderGists();
   } catch {
     // Non-fatal — the repo grid is the important part, profile header can stay minimal.
     if (!cached) els.displayName.textContent = GITHUB_USERNAME;
@@ -135,6 +208,160 @@ function renderProfile(profile) {
   state.profile = profile;
   renderRepoStats();
   els.profileLink.href = profile.html_url || els.profileLink.href;
+  els.gistsLink.href = profile.html_url ? `https://gist.github.com/${profile.login}` : els.gistsLink.href;
+}
+
+async function loadGists() {
+  if (!state.profile) {
+    const cachedProfile = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
+    if (cachedProfile) state.profile = cachedProfile.data;
+  }
+
+  const cached = readCache(GISTS_CACHE_KEY, GISTS_CACHE_TTL_MS);
+  if (cached) {
+    state.gists = cached.data;
+    renderGists();
+  }
+  if (cached && cached.isFresh) return;
+
+  try {
+    const gists = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`);
+    state.gists = gists;
+    writeCache(GISTS_CACHE_KEY, gists);
+    renderGists();
+  } catch {
+    if (!cached) {
+      els.gistsStatus.textContent = "Gists are unavailable right now.";
+    }
+  }
+}
+
+function getTotalGistsCount() {
+  if (state.profile && Number.isFinite(state.profile.public_gists)) {
+    return state.profile.public_gists;
+  }
+  const cachedProfile = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
+  if (cachedProfile?.data && Number.isFinite(cachedProfile.data.public_gists)) {
+    state.profile = cachedProfile.data;
+    return cachedProfile.data.public_gists;
+  }
+  return state.gists ? state.gists.length : 0;
+}
+
+function filterGists(gists, query) {
+  if (!query) return gists;
+  const q = query.trim().toLowerCase();
+  return gists.filter((gist) => {
+    const desc = (gist.description || "").toLowerCase();
+    const files = Object.keys(gist.files || {}).join(" ").toLowerCase();
+    return desc.includes(q) || files.includes(q);
+  });
+}
+
+function renderGists() {
+  if (!els.gistsList) return;
+  els.gistsList.replaceChildren();
+
+  const publicGists = [...state.gists]
+    .filter((gist) => gist.public !== false)
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+  const total = getTotalGistsCount();
+
+  if (els.gistsBadge) {
+    if (total > 0) {
+      els.gistsBadge.textContent = total.toLocaleString();
+      els.gistsBadge.hidden = false;
+    } else {
+      els.gistsBadge.hidden = true;
+    }
+  }
+
+  const query = state.gistsFilter ? state.gistsFilter.trim() : "";
+  const filtered = filterGists(publicGists, query);
+
+  if (query) {
+    if (filtered.length === 0) {
+      els.gistsStatus.textContent = `No gists match "${query}".`;
+    } else {
+      els.gistsStatus.textContent = `Showing ${filtered.length} of ${total.toLocaleString()} public gists`;
+    }
+  } else {
+    els.gistsStatus.textContent = total
+      ? `${total.toLocaleString()} public gist${total === 1 ? "" : "s"}`
+      : "No public gists yet.";
+  }
+
+  if (filtered.length === 0 && query) {
+    const empty = document.createElement("li");
+    empty.className = "gist-empty";
+    empty.textContent = "Try searching for a different file or keyword.";
+    els.gistsList.appendChild(empty);
+    removeMoreBtn();
+    return;
+  }
+
+  const sliceLimit = query ? filtered.length : state.gistsLimit;
+  filtered.slice(0, sliceLimit).forEach((gist) => {
+    const item = document.createElement("li");
+    item.className = "gist-item";
+    const link = document.createElement("a");
+    link.href = gist.html_url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "gist-title";
+    const files = Object.keys(gist.files || {});
+    const primaryFile = files[0] || "";
+    link.textContent = gist.description || primaryFile || "Untitled gist";
+    item.appendChild(link);
+    const meta = document.createElement("span");
+    meta.className = "gist-meta";
+    const fileCount = files.length;
+    const fileDesc = gist.description && primaryFile ? `${primaryFile} · ` : "";
+    meta.textContent = `${fileDesc}${fileCount} file${fileCount === 1 ? "" : "s"} · Updated ${relativeTime(gist.updated_at)}`;
+    item.appendChild(meta);
+    els.gistsList.appendChild(item);
+  });
+
+  updateMoreBtn(filtered.length, query);
+}
+
+function updateMoreBtn(totalItems, query) {
+  let btn = document.getElementById("gists-more-btn");
+  if (query || totalItems <= DEFAULT_GISTS_TO_SHOW) {
+    if (btn) btn.remove();
+    return;
+  }
+
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "gists-more-btn";
+    btn.type = "button";
+    btn.className = "gists-more-btn";
+    btn.addEventListener("click", () => {
+      if (state.gistsLimit < totalItems) {
+        state.gistsLimit = Math.min(state.gistsLimit + 5, totalItems);
+      } else {
+        state.gistsLimit = DEFAULT_GISTS_TO_SHOW;
+      }
+      renderGists();
+    });
+    if (els.gistsBody) els.gistsBody.appendChild(btn);
+  }
+
+  if (state.gistsLimit < totalItems) {
+    const remaining = totalItems - state.gistsLimit;
+    btn.textContent = `Show more (${Math.min(5, remaining)} more)`;
+    btn.title = `Show 5 more of ${totalItems} loaded gists`;
+  } else {
+    btn.textContent = "Show less";
+    btn.title = `Collapse back to latest ${DEFAULT_GISTS_TO_SHOW} gists`;
+  }
+}
+
+function removeMoreBtn() {
+  const btn = document.getElementById("gists-more-btn");
+  if (btn) btn.remove();
 }
 
 function publicRepos() {

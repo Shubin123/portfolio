@@ -1,13 +1,98 @@
 const { test, expect } = require('@playwright/test');
 const repos = require('./repos.json');
 async function open(page) {
-  await page.route(/^https:\/\/api\.github\.com\/users\/Shubin123(?:\/repos\?.*)?$/, route => {
+  await page.route(/^https:\/\/api\.github\.com\/users\/Shubin123(?:\/(?:repos|gists)\?.*)?$/, route => {
     if (route.request().url().includes('/repos?')) return route.fulfill({ json: repos });
+    if (route.request().url().includes('/gists?')) return route.fulfill({ json: [
+      { id: 'one', description: 'Useful script', html_url: 'https://gist.github.com/Shubin123/one', updated_at: '2026-09-10T00:00:00Z', public: true, files: { 'script.js': {} } },
+      { id: 'two', description: '', html_url: 'https://gist.github.com/Shubin123/two', updated_at: '2026-09-09T00:00:00Z', public: true, files: { 'notes.md': {}, 'data.json': {} } },
+    ] });
     return route.fulfill({ json: { login: 'Shubin123', public_repos: 999, followers: 4 } });
   });
   await page.goto('./');
   await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27);
 }
+test('latest public gists are available in the visible sidebar widget', async ({ page }) => {
+  await open(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(page.locator('.gists-widget')).toBeVisible();
+  await expect(page.locator('#gists-status')).toHaveText('2 public gists');
+  await expect(page.locator('.gist-item')).toHaveCount(2);
+  await expect(page.getByRole('link', { name: 'Useful script', exact: true })).toHaveAttribute('href', 'https://gist.github.com/Shubin123/one');
+  await expect(page.locator('.gist-item').nth(1)).toContainText('notes.md');
+  await expect(page.locator('.gists-widget')).toHaveCSS('position', 'sticky');
+  await page.setViewportSize({ width: 600, height: 900 });
+  await expect(page.locator('.gists-widget')).toHaveCSS('position', 'static');
+});
+test('gist count reflects true total around 600 from profile, shows latest gists with filtering across all 100, and expands UI panes via pulldown', async ({ page }) => {
+  const mockGists = Array.from({ length: 100 }, (_, i) => ({
+    id: `gist-${i + 1}`,
+    description: i === 0 ? 'Target Special Research' : `Gist description ${i + 1}`,
+    html_url: `https://gist.github.com/Shubin123/gist-${i + 1}`,
+    updated_at: new Date(Date.now() - i * 60000).toISOString(),
+    public: true,
+    files: { [`file_${i + 1}.js`]: {} },
+  }));
+
+  await page.route(/^https:\/\/api\.github\.com\/users\/Shubin123(?:\/(?:repos|gists)\?.*)?$/, route => {
+    if (route.request().url().includes('/repos?')) return route.fulfill({ json: repos });
+    if (route.request().url().includes('/gists?')) return route.fulfill({ json: mockGists });
+    return route.fulfill({ json: { login: 'Shubin123', public_repos: 32, public_gists: 607, followers: 4 } });
+  });
+
+  await page.goto('./');
+  await page.setViewportSize({ width: 1280, height: 900 });
+
+  // Verify count is accurate (specifically 607 from profile) and not stuck at 100
+  await expect(page.locator('#gists-status')).toHaveText('607 public gists');
+  await expect(page.locator('#gists-count-badge')).toHaveText('607');
+
+  // Verify default view does not show full 100 list (shows latest 5)
+  await expect(page.locator('.gist-item')).toHaveCount(5);
+  await expect(page.locator('#gists-more-btn')).toBeVisible();
+
+  // Test "Show more" expands list
+  await page.locator('#gists-more-btn').click();
+  await expect(page.locator('.gist-item')).toHaveCount(10);
+
+  // Verify interactive filtering searches across all 100 loaded gists
+  await page.locator('#gists-filter').fill('Target Special');
+  await expect(page.locator('.gist-item')).toHaveCount(1);
+  await expect(page.locator('#gists-status')).toHaveText('Showing 1 of 607 public gists');
+  await expect(page.locator('.gist-title')).toHaveText('Target Special Research');
+
+  // Verify filter by filename deeper in the 100 list
+  await page.locator('#gists-filter').fill('file_42.js');
+  await expect(page.locator('.gist-item')).toHaveCount(1);
+  await expect(page.locator('.gist-title')).toHaveText('Gist description 42');
+
+  // Verify filter clear button restores default count of 5
+  await page.locator('#gists-filter-clear').click();
+  await expect(page.locator('.gist-item')).toHaveCount(5);
+  await expect(page.locator('#gists-status')).toHaveText('607 public gists');
+
+  // Verify interactive pulldown toggle & UI panes expansion
+  const projectsPanel = page.locator('.projects-panel');
+  const widthBeforeCollapse = await projectsPanel.evaluate(el => el.getBoundingClientRect().width);
+
+  // Click pulldown toggle button to collapse widget
+  await page.locator('#gists-toggle').click();
+  await expect(page.locator('#gists-toggle')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('#gists-widget')).toHaveClass(/is-collapsed/);
+  await expect(page.locator('#gists-body')).toBeHidden();
+
+  // Assert that the rest of the UI panes (projects-panel) expanded
+  const widthAfterCollapse = await projectsPanel.evaluate(el => el.getBoundingClientRect().width);
+  const layoutWidth = await page.locator('.content-layout').evaluate(el => el.getBoundingClientRect().width);
+  expect(widthAfterCollapse).toBeGreaterThan(widthBeforeCollapse);
+  expect(widthAfterCollapse).toBeCloseTo(layoutWidth, 0);
+
+  // Click pulldown toggle button again to expand (pull down) widget
+  await page.locator('#gists-toggle').click();
+  await expect(page.locator('#gists-toggle')).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#gists-body')).toBeVisible();
+  await expect(page.locator('.gist-item')).toHaveCount(5);
+});
 test('public total is the same snapshot as non-forks and forks, independent of profile API', async ({ page }) => {
   await open(page);
   await expect(page.locator('#profile-stats')).toContainText('32 public repos');
