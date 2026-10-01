@@ -36,9 +36,21 @@ MARKS = {
 'vul': ('coral','<path d="m12 17 20 36 20-36H12Zm10 0 10 20 10-20M12 17l20-7 20 7M21 48h-8m38 0h-8"/>'),
 'whyfightree': ('lime','<path d="M32 51V28m0 12-12-8m12 2 12-8"/><path d="M21 37c-15-1-13-19-2-19 2-13 23-13 26 0 13 0 15 19 0 19M15 50h34"/>'),
 'zom': ('lime','<path d="M18 14h28v7h6v25h-9v7H21v-7h-9V21h6v-7Z"/><path d="M23 25v8m18-8v8M23 43h18m-13-4v8m8-8v8"/>'),
+'6dof-gym-web': ('cyan', '<path d="M14 51h36M22 51V39l12-12-8-10m8 10 11-7 6 6m-6-6 5-6"/><circle cx="22" cy="39" r="5"/><circle cx="34" cy="27" r="4"/><circle cx="26" cy="17" r="4"/>'),
+'azahar_web': ('gold', '<rect x="14" y="11" width="36" height="19" rx="4"/><rect x="14" y="34" width="36" height="19" rx="4"/><path d="M23 40v8m-4-4h8m7-27h8"/><circle cx="41" cy="43" r="2" fill="currentColor"/>'),
+'csc320-concept-atlas': ('purple', '<circle cx="32" cy="32" r="7"/><circle cx="16" cy="17" r="5"/><circle cx="48" cy="17" r="5"/><circle cx="16" cy="48" r="5"/><circle cx="48" cy="48" r="5"/><path d="m20 21 7 7m10 0 7-7M20 44l7-7m10 0 7 7"/>'),
+'doge': ('gold', '<path d="m16 26 2-15 13 9h5l12-9 1 16v17L37 53H26L15 43V26Z"/><path d="m24 31 3 1m10 0 3-1m-12 9h8l-4 5-4-5Zm4 5v5"/>'),
+'doom_ball': ('coral', '<rect x="19" y="19" width="26" height="26" rx="4"/><path d="M25 11v8m14-8v8m-14 26v8m14-8v8M11 25h8m-8 14h8m26-14h8m-8 14h8m-22-13-5 9h7l-5 9"/>'),
+'keydropper': ('cyan', '<rect x="11" y="17" width="42" height="30" rx="5"/><path d="M18 25h3m7 0h3m7 0h3m-23 8h3m7 0h3m7 0h3m-19 8h20"/>'),
+'submarine': ('blue', '<path d="M14 27h31a10 10 0 0 1 0 20H14a10 10 0 0 1 0-20Zm9 0V17h13v10m-6-10v-6h9M55 31l5-5v21l-5-5M17 54h30"/><circle cx="20" cy="37" r="4"/><circle cx="34" cy="37" r="4"/>'),
+'wynncraft-quicklaunch': ('green', '<path d="m18 15 15 15 14-14 4 4-14 14 12 12-5 5-12-12-10 10-7-7 10-10-12-12 5-5Z"/><path d="m18 15 4 10m25-9-10 4"/>'),
+'spend_track': ('gold', '<path d="M13 18h34v8H17a5 5 0 0 0-5 5v15a5 5 0 0 0 5 5h34V26H17M51 34H39v9h12"/><circle cx="43" cy="38.5" r="1.5" fill="currentColor"/>'),
+'possess': ('possess', '\n    <circle cx="32" cy="21" r="4.2"/>\n    <path d="M32 25.5v13m-11-8.5h22M32 38.5 26 49m6-10.5L38 49M11 23v-9h9m24 0h9v9M11 43v9h9m24 0h9v-9"/>\n  '),
+'azahar': ('gold', '<path d="M32 51V27m0 8C12 35 13 12 32 23c19-11 20 12 0 12Z"/><path d="M24 50h16"/>'),
+'cg-fall-2026': ('purple', '<path d="m32 12 21 36H11L32 12Zm0 0v36m-21 0 31-18m11 18L22 30"/>'),
 'project': ('blue','<rect x="14" y="17" width="36" height="33" rx="5"/><path d="M14 25h36m-27 7-5 5 5 5m18-10 5 5-5 5m-6-11-6 13"/>'),
 }
-PALETTE = {'blue':('#192b3b','#88caff'),'gold':('#302b18','#e3d17f'),'green':('#19352e','#8ce2bf'),'pink':('#342337','#f2b0d5'),'lime':('#243223','#bbe495'),'cyan':('#19353a','#8adce4'),'purple':('#27263d','#b7b2ff'),'coral':('#3c2721','#ffb299'),'stonk':('#23301c','#d7fc70')}
+PALETTE = {'possess':('#1e2438','#9db4f0'),'blue':('#192b3b','#88caff'),'gold':('#302b18','#e3d17f'),'green':('#19352e','#8ce2bf'),'pink':('#342337','#f2b0d5'),'lime':('#243223','#bbe495'),'cyan':('#19353a','#8adce4'),'purple':('#27263d','#b7b2ff'),'coral':('#3c2721','#ffb299'),'stonk':('#23301c','#d7fc70')}
 root = Path(__file__).resolve().parents[1]
 for name,(palette,geometry) in MARKS.items():
  bg,fg=PALETTE[palette]

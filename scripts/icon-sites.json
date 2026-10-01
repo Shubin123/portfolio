@@ -54,5 +54,55 @@
   "portfolio": {
     "source": "assets/icons/portfolio.svg",
     "deployed": "assets/icons/portfolio.svg"
+  },
+  "6dof-gym-web": {
+    "source": "public/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "azahar_web": {
+    "source": "web/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "csc320-concept-atlas": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "doge": {
+    "source": "tools/web/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "doom_ball": {
+    "source": "docs/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "keydropper": {
+    "source": "web/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "submarine": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "wynncraft-quicklaunch": {
+    "source": "docs/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "spend_track": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
+  },
+  "possess": {
+    "source": "app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": false
   }
 }

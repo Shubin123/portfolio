@@ -18,9 +18,11 @@ describe('deployed sites', () => {
       // The favicon and the on-page mark both point at the deployed icon.
       await expect(page.locator(`link[rel="icon"]`)).toHaveAttribute('href', new RegExp(`${paths.deployed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
       const mark = page.locator('img.project-mark, img.brand-icon, img.project-icon').first();
-      await expect(mark).toBeVisible();
-      // The React sites mount after load, so the mark decodes late — poll for it.
-      await expect.poll(() => mark.evaluate(img => img.naturalWidth), { timeout: 15000 }).toBeGreaterThan(0);
+      if (paths.header !== false) {
+        await expect(mark).toBeVisible();
+        // The React sites mount after load, so the mark decodes late — poll for it.
+        await expect.poll(() => mark.evaluate(img => img.naturalWidth), { timeout: 15000 }).toBeGreaterThan(0);
+      }
 
       // Byte-identical to the copy the portfolio grid renders, so one icon set
       // covers the card and the site it links to.

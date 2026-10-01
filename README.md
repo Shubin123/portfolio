@@ -29,11 +29,12 @@ and the site it links to read as one project.
   there and re-run it (`python3 scripts/generate-icons.py`) to add a project;
   anything without a mark falls back to `project.svg`.
 - `npm run check:icons` asserts every project in `tests/repos.json` has a mark
-  and that the marks are pure vector geometry — no `<text>`, `<image>`,
+  and every mapped Pages site has a mark. It also checks all marks are pure vector geometry — no `<text>`, `<image>`,
   `<script>`, or emoji, so they stay crisp at any size and need no font.
 - `scripts/icon-sites.json` records where each deployed site keeps its copy.
-  `npm run test:live` fetches all 14 Pages deployments and fails if a site's
+  `npm run test:live` fetches all 24 Pages deployments and fails if a site's
   icon is missing, unreachable, or no longer byte-identical to the card's.
+  Sites with a header logo also check that the logo loads.
 
 ## Tests
 
