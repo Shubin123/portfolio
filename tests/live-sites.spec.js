@@ -17,7 +17,7 @@ describe('deployed sites', () => {
 
       // The favicon and the on-page mark both point at the deployed icon.
       await expect(page.locator(`link[rel="icon"]`)).toHaveAttribute('href', new RegExp(`${paths.deployed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
-      const mark = page.locator('img.project-mark, img.brand-icon, img.project-icon').first();
+      const mark = page.locator(`img.project-mark, img.brand-icon, img.project-icon, img[src$="${paths.deployed}"]`).first();
       if (paths.header !== false) {
         await expect(mark).toBeVisible();
         // The React sites mount after load, so the mark decodes late — poll for it.
