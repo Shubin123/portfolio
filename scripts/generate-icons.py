@@ -4,6 +4,19 @@ import json
 
 # All marks share a 64px canvas, rounded tile, and 2.6px stroke.
 MARKS = {
+'desert-ant-align-demo': ('cyan','<path d="M12 43h40M17 21v15m10-19v19m10-15v15m10-19v19M17 43v8m10-8v5m10-5v8m10-8v5"/><circle cx="27" cy="24" r="3"/><circle cx="47" cy="24" r="3"/>'),
+'desert-ant-clear-demo': ('green','<path d="M13 30v5m6-13v21m6-25v29m7-34v38m7-27v17m6-12v7m5-5v3M40 13v10m-5-5h10"/>'),
+'desert-ant-clips-demo': ('gold','<rect x="12" y="16" width="40" height="34" rx="4"/><path d="M12 25h40m-31-9 6 9m7-9 6 9m-14 7 12 7-12 7Z"/>'),
+'desert-ant-ear-demo': ('blue','<path d="M22 27a12 12 0 0 1 24 0c0 8-9 9-10 17-1 8-13 8-13 0M28 28a6 6 0 0 1 12 0c0 5-6 5-7 10M12 24a18 18 0 0 0 0 15"/>'),
+'desert-ant-emo-demo': ('gold','<circle cx="32" cy="32" r="19"/><path d="M22 35c3 9 17 9 20 0M23 26h1m16 0h1"/><circle cx="23.5" cy="26" r="1.5" fill="currentColor"/><circle cx="40.5" cy="26" r="1.5" fill="currentColor"/>'),
+'desert-ant-gist-demo': ('purple','<path d="m13 17 19-4 19 4v30l-19 4-19-4V17Zm19-4v38M20 24h6m-6 8h6m-6 8h6m12-16h6m-6 8h6m-6 8h6"/>'),
+'desert-ant-moderator-demo': ('coral','<path d="m32 11 19 8v13c0 12-19 22-19 22S13 44 13 32V19l19-8Z"/><path d="m23 32 6 6 12-13"/>'),
+'desert-ant-redact-demo': ('pink','<rect x="15" y="11" width="34" height="42" rx="4"/><path d="M22 20h20m-20 24h20"/><rect x="21" y="27" width="22" height="9" rx="2" fill="currentColor" stroke="none"/>'),
+'desert-ant-shapes-demo': ('cyan','<circle cx="23" cy="24" r="10"/><path d="m41 13 12 21H29l12-21Z"/><rect x="19" y="38" width="25" height="15" rx="2"/>'),
+'desert-ant-title-demo': ('purple','<rect x="12" y="14" width="40" height="37" rx="4"/><path d="M22 22h20m-10 0v15m-5 0h10m-17 7h24"/>'),
+'desert-ant-tongue-demo': ('lime','<circle cx="32" cy="29" r="17"/><path d="M15 29h34M32 12c-11 9-11 25 0 34 11-9 11-25 0-34M19 52h26m-7-6 7 6-7 5"/>'),
+'desert-ant-uhm-demo': ('green','<path d="M13 31v5m6-12v19m7-27v35m13-35v35m7-27v19m6-12v5"/><path d="M29 25v16m6-16v16"/>'),
+'desert-ant-voz-demo': ('blue','<rect x="25" y="11" width="14" height="26" rx="7"/><path d="M19 29a13 13 0 0 0 26 0M32 42v11m-8 0h16M12 19v13m40-13v13"/>'),
 'aimjs': ('blue','<circle cx="32" cy="32" r="13"/><circle cx="32" cy="32" r="4"/><path d="M32 12v10m0 20v10M12 32h10m20 0h10"/>'),
 'amazon-scraper': ('gold','<path d="M19 26h26l3 23H16l3-23Zm6 0v-5a7 7 0 0 1 14 0v5M24 35h16m-16 7h10"/>'),
 'avr_visual': ('green','<rect x="21" y="21" width="22" height="22" rx="3"/><path d="M27 13v8m10-8v8m-10 22v8m10-8v8M13 27h8m-8 10h8m22-10h8m-8 10h8m-24-1 5-9 5 9m-8-3h6"/>'),

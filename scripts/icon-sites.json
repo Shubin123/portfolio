@@ -104,5 +104,60 @@
     "source": "app-icon.svg",
     "deployed": "app-icon.svg",
     "header": false
+  },
+  "desert-ant-align-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-clear-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-ear-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-emo-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-gist-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-moderator-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-redact-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-shapes-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-tongue-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-uhm-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-voz-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
   }
 }
