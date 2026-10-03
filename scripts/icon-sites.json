@@ -105,6 +105,11 @@
     "deployed": "app-icon.svg",
     "header": false
   },
+  "desert-ant-clips-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
   "desert-ant-align-demo": {
     "source": "site/app-icon.svg",
     "deployed": "app-icon.svg",
