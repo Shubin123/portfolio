@@ -4,6 +4,11 @@ import json
 
 # All marks share a 64px canvas, rounded tile, and 2.6px stroke.
 MARKS = {
+'desert-ant-eye-demo': ('cyan','<path d="M8 32s9-16 24-16 24 16 24 16-9 16-24 16S8 32 8 32Z"/><circle cx="32" cy="32" r="8"/><path d="M47 10v10m-5-5h10"/>'),
+'desert-ant-face-demo': ('gold','<path d="M11 23V12h11m20 0h11v11M11 41v11h11m20 0h11V41"/><ellipse cx="32" cy="29" rx="12" ry="15"/><path d="M19 49c4-8 22-8 26 0m-20-22h1m12 0h1m-11 9h8"/>'),
+'desert-ant-schemer-demo': ('purple','<path d="M20 13c-7 0-7 6-7 12s-5 7-5 7 5 1 5 7 0 12 7 12m24-38c7 0 7 6 7 12s5 7 5 7-5 1-5 7 0 12-7 12M25 23h14m-14 9h14m-14 9h8"/>'),
+'desert-ant-toxic-demo': ('coral','<path d="m32 11 22 39H10l22-39Z"/><path d="M32 24v13"/><circle cx="32" cy="43" r="1.7" fill="currentColor"/>'),
+'desert-ant-who-demo': ('blue','<circle cx="21" cy="20" r="7"/><circle cx="43" cy="20" r="7"/><path d="M10 39c0-13 22-13 22 0m0 0c0-13 22-13 22 0M12 48h15m10 0h15m-40 7h8m17 0h8"/>'),
 'desert-ant-align-demo': ('cyan','<path d="M12 43h40M17 21v15m10-19v19m10-15v15m10-19v19M17 43v8m10-8v5m10-5v8m10-8v5"/><circle cx="27" cy="24" r="3"/><circle cx="47" cy="24" r="3"/>'),
 'desert-ant-clear-demo': ('green','<path d="M13 30v5m6-13v21m6-25v29m7-34v38m7-27v17m6-12v7m5-5v3M40 13v10m-5-5h10"/>'),
 'desert-ant-clips-demo': ('gold','<rect x="12" y="16" width="40" height="34" rx="4"/><path d="M12 25h40m-31-9 6 9m7-9 6 9m-14 7 12 7-12 7Z"/>'),

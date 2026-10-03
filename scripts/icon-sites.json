@@ -159,5 +159,35 @@
     "source": "site/app-icon.svg",
     "deployed": "app-icon.svg",
     "header": true
+  },
+  "desert-ant-title-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-eye-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-face-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-schemer-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-toxic-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
+  "desert-ant-who-demo": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
   }
 }
