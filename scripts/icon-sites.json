@@ -190,6 +190,11 @@
     "deployed": "app-icon.svg",
     "header": true
   },
+  "desert-ant-video-pipeline": {
+    "source": "site/app-icon.svg",
+    "deployed": "app-icon.svg",
+    "header": true
+  },
   "desert-ant-who-demo": {
     "source": "site/app-icon.svg",
     "deployed": "app-icon.svg",

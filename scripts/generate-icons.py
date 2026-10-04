@@ -4,6 +4,7 @@ import json
 
 # All marks share a 64px canvas, rounded tile, and 2.6px stroke.
 MARKS = {
+ 'desert-ant-video-pipeline': ('gold','<rect x="12" y="16" width="40" height="34" rx="4"/><path d="M12 25h40m-31-9 6 9m7-9 6 9m-14 7 12 7-12 7Z"/>'),
 'desert-ant-eye-demo': ('cyan','<path d="M8 32s9-16 24-16 24 16 24 16-9 16-24 16S8 32 8 32Z"/><circle cx="32" cy="32" r="8"/><path d="M47 10v10m-5-5h10"/>'),
 'desert-ant-face-demo': ('gold','<path d="M11 23V12h11m20 0h11v11M11 41v11h11m20 0h11V41"/><ellipse cx="32" cy="29" rx="12" ry="15"/><path d="M19 49c4-8 22-8 26 0m-20-22h1m12 0h1m-11 9h8"/>'),
 'desert-ant-schemer-demo': ('purple','<path d="M20 13c-7 0-7 6-7 12s-5 7-5 7 5 1 5 7 0 12 7 12m24-38c7 0 7 6 7 12s5 7 5 7-5 1-5 7 0 12-7 12M25 23h14m-14 9h14m-14 9h8"/>'),
