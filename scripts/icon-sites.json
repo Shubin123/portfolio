@@ -199,5 +199,10 @@
     "source": "site/app-icon.svg",
     "deployed": "app-icon.svg",
     "header": true
+  },
+  "space-loop": {
+    "source": "assets/icon.svg",
+    "deployed": "assets/icon.svg?v=2",
+    "header": true
   }
 }
