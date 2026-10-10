@@ -46,13 +46,13 @@ opt-in network check described above.
 Because the GitHub REST API only returns public repositories for
 unauthenticated requests, the page can never expose private projects.
 
-Results are cached in `localStorage` — repos for 30 minutes, profile info for
-24 hours (it rarely changes) — and while the cache is fresh, page loads skip
+Results are cached in `localStorage` — repos, gists, and profile info (which
+carries the public gist count) for 30 minutes — and while the cache is fresh, page loads skip
 the network call entirely. This matters because GitHub's unauthenticated API
 allows only 60 requests/hour per visitor IP, and that quota is consumed even
 by conditional (ETag) requests that return a 304, so caching is the only real
 lever. A "Refresh" link next to the status line lets a visitor force an
-immediate check without waiting out the cache window. If a refresh fails
+immediate check of repos, profile, and gists without waiting out the cache window. If a refresh fails
 (e.g. rate limited), the page falls back to the cached copy and says how old
 it is.
 

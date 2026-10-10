@@ -169,3 +169,32 @@ test('empty accounts and private records do not produce stale or misleading tota
   await expect(page.locator('#repo-count')).toHaveText('Showing 0 of 0 public repositories');
   await expect(page.locator('.empty-state')).toHaveText('No public repositories yet.');
 });
+test('gist count updates from GitHub instead of staying on a stale cached profile', async ({ page }) => {
+  let liveCount = 612;
+  await page.route(/^https:\/\/api\.github\.com\/users\/Shubin123(?:\/(?:repos|gists)\?.*)?$/, route => {
+    if (route.request().url().includes('/repos?')) return route.fulfill({ json: repos });
+    if (route.request().url().includes('/gists?')) return route.fulfill({ json: [
+      { id: 'one', description: 'Useful script', html_url: 'https://gist.github.com/Shubin123/one', updated_at: '2026-09-10T00:00:00Z', public: true, files: { 'script.js': {} } },
+    ] });
+    return route.fulfill({ json: { login: 'Shubin123', public_repos: 32, public_gists: liveCount, followers: 4 } });
+  });
+  // Seed a profile cached an hour ago with an older count.
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('gh-portfolio-profile:Shubin123', JSON.stringify({
+      timestamp: Date.now() - 60 * 60 * 1000,
+      data: { login: 'Shubin123', public_repos: 32, public_gists: 607, followers: 4 },
+    }));
+  });
+
+  await page.goto('./');
+  await expect(page.locator('#gists-count-badge')).toHaveText('612');
+  await expect(page.locator('#gists-status')).toHaveText('612 public gists');
+
+  // A new gist is published; Refresh picks it up even though the cache is fresh.
+  liveCount = 613;
+  await page.locator('#refresh-btn').click();
+  await expect(page.locator('#gists-count-badge')).toHaveText('613');
+  await expect(page.locator('#gists-status')).toHaveText('613 public gists');
+});

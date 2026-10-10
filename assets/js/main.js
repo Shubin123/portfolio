@@ -8,7 +8,7 @@ const GITHUB_USERNAME = "Shubin123";
 const REPOS_CACHE_KEY = `gh-portfolio-repos:${GITHUB_USERNAME}`;
 const REPOS_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — new repos show up within this window
 const PROFILE_CACHE_KEY = `gh-portfolio-profile:${GITHUB_USERNAME}`;
-const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — avatar/bio/name rarely change
+const PROFILE_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes — the profile carries the public gist count, which must track new gists
 const GISTS_CACHE_KEY = `gh-portfolio-gists:${GITHUB_USERNAME}`;
 const GISTS_CACHE_TTL_MS = 30 * 60 * 1000;
 const DEFAULT_GISTS_TO_SHOW = 5;
@@ -125,7 +125,11 @@ function bindControls() {
     state.showForks = e.target.checked;
     render();
   });
-  els.refreshBtn.addEventListener("click", () => loadRepos(true));
+  els.refreshBtn.addEventListener("click", () => {
+    loadRepos(true);
+    loadProfile(true);
+    loadGists(true);
+  });
 }
 
 function bindGistsControls() {
@@ -178,13 +182,13 @@ function toggleGistsWidget(forceState) {
   }
 }
 
-async function loadProfile() {
+async function loadProfile(force = false) {
   const cached = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
   if (cached) {
     renderProfile(cached.data);
     renderGists();
   }
-  if (cached && cached.isFresh) return; // fresh — skip the network call
+  if (cached && cached.isFresh && !force) return; // fresh — skip the network call
 
   try {
     const profile = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}`);
@@ -211,7 +215,7 @@ function renderProfile(profile) {
   els.gistsLink.href = profile.html_url ? `https://gist.github.com/${profile.login}` : els.gistsLink.href;
 }
 
-async function loadGists() {
+async function loadGists(force = false) {
   if (!state.profile) {
     const cachedProfile = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
     if (cachedProfile) state.profile = cachedProfile.data;
@@ -222,7 +226,7 @@ async function loadGists() {
     state.gists = cached.data;
     renderGists();
   }
-  if (cached && cached.isFresh) return;
+  if (cached && cached.isFresh && !force) return;
 
   try {
     const gists = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`);
@@ -236,16 +240,10 @@ async function loadGists() {
   }
 }
 
-function getTotalGistsCount() {
-  if (state.profile && Number.isFinite(state.profile.public_gists)) {
-    return state.profile.public_gists;
-  }
-  const cachedProfile = readCache(PROFILE_CACHE_KEY, PROFILE_CACHE_TTL_MS);
-  if (cachedProfile?.data && Number.isFinite(cachedProfile.data.public_gists)) {
-    state.profile = cachedProfile.data;
-    return cachedProfile.data.public_gists;
-  }
-  return state.gists ? state.gists.length : 0;
+function getTotalGistsCount(loadedCount) {
+  // The gist list and profile are fetched separately, so never report fewer gists than are actually loaded.
+  const profileCount = Number.isFinite(state.profile?.public_gists) ? state.profile.public_gists : 0;
+  return Math.max(profileCount, loadedCount);
 }
 
 function filterGists(gists, query) {
@@ -266,7 +264,7 @@ function renderGists() {
     .filter((gist) => gist.public !== false)
     .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
-  const total = getTotalGistsCount();
+  const total = getTotalGistsCount(publicGists.length);
 
   if (els.gistsBadge) {
     if (total > 0) {
