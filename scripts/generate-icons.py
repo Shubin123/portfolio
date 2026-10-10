@@ -68,6 +68,12 @@ MARKS = {
 'azahar': ('gold', '<path d="M32 51V27m0 8C12 35 13 12 32 23c19-11 20 12 0 12Z"/><path d="M24 50h16"/>'),
 'cg-fall-2026': ('purple', '<path d="m32 12 21 36H11L32 12Zm0 0v36m-21 0 31-18m11 18L22 30"/>'),
 'space-loop': ('space', '<ellipse cx="32" cy="32" rx="25" ry="14" transform="rotate(-35 32 32)"/><circle cx="30" cy="34" r="8" fill="currentColor" stroke="none"/><path d="m49 10 5 15-7-3-5 5 7-17Z" fill="#ffad82" stroke="#0b111a" stroke-width="2"/>'),
+'arduino-web': ('cyan', '<path d="M32 32c-7-15-21-12-21 0s14 15 21 0c7-15 21-12 21 0s-14 15-21 0Z"/><path d="M16 32h10m15 0h10m-5-5v10"/>'),
+'dolphin_web': ('blue', '<path d="M11 38c8-15 20-21 33-16l9 8-10-1c-6 4-10 9-13 18l-3-11-10 7 2-9-8 4Zm18-15 2-10 10 9M43 29l9 12-13-7"/><circle cx="44" cy="25" r="1" fill="currentColor"/>'),
+'card-battle-agent-lab': ('coral', '<rect x="11" y="14" width="26" height="35" rx="4" transform="rotate(-10 24 31)"/><rect x="27" y="16" width="25" height="35" rx="4" fill="#3c2721"/><path d="m39.5 23-7 10 7 10 7-10-7-10Z"/>'),
+'flix': ('lime', '<path d="M26 16h23v7H33v9h13v7H33v12h-7V16Z"/><circle cx="16" cy="19" r="2" fill="currentColor"/><circle cx="16" cy="32" r="2" fill="currentColor"/><circle cx="16" cy="45" r="2" fill="currentColor"/>'),
+'petals': ('green', '<ellipse cx="32" cy="20" rx="7" ry="12"/><ellipse cx="32" cy="44" rx="7" ry="12"/><ellipse cx="20" cy="32" rx="12" ry="7"/><ellipse cx="44" cy="32" rx="12" ry="7"/><circle cx="32" cy="32" r="6" fill="currentColor"/>'),
+'xemu_web': ('lime', '<path d="m17 16 30 32m0-32L17 48" stroke-width="7"/>'),
 'project': ('blue','<rect x="14" y="17" width="36" height="33" rx="5"/><path d="M14 25h36m-27 7-5 5 5 5m18-10 5 5-5 5m-6-11-6 13"/>'),
 }
 PALETTE = {'space':('#0b111a','#a4ead3'),'possess':('#1e2438','#9db4f0'),'blue':('#192b3b','#88caff'),'gold':('#302b18','#e3d17f'),'green':('#19352e','#8ce2bf'),'pink':('#342337','#f2b0d5'),'lime':('#243223','#bbe495'),'cyan':('#19353a','#8adce4'),'purple':('#27263d','#b7b2ff'),'coral':('#3c2721','#ffb299'),'stonk':('#23301c','#d7fc70')}
