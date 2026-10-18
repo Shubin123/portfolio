@@ -8,15 +8,24 @@ ones, with nothing to keep in sync.
 
 ## How it works
 
-- `index.html` — page structure (profile header, search/sort controls, project grid, gists widget).
+- `index.html` — page structure (profile header, search/sort controls, tag cluster toolbar, project grid, gists widget).
 - `assets/css/style.css` — styling, including a dark theme that follows the visitor's OS preference and responsive pane transitions.
-- `assets/js/main.js` — fetches GitHub repositories, profile, and gists on load, then handles interactive sorting, live filtering, and widget pulldown client-side.
+- `assets/js/main.js` — fetches GitHub repositories, profile, and gists on load, then handles interactive sorting, tag-based clustering, live filtering, and widget pulldown client-side.
 - `assets/icons/*.svg` + `assets/js/icons.js` — one mark per project (see below).
 
 The header counts a repository once: **public repos = non-forks + forks**, all
 three read off the same list the grid renders, so the total never disagrees with
 what is on screen. Forks are hidden by default and the status line says how many
 that is; the toggle shows them without changing the total.
+
+## Tagging and project clusters
+
+Projects are tagged and clustered by domain (such as AI, graphics, robotics, tools, web, and games).
+
+- **Tag cluster bar**: Displays all tag clusters found across loaded repositories with live project counts. Clicking a tag pill filters the grid to that cluster; clicking it again (or clicking "All") restores the full view.
+- **Interactive card tags**: Topic chips on project cards are interactive buttons. Clicking any tag chip on a card immediately focuses the view on that tag cluster.
+- **Cluster by tag mode**: The "Cluster by tag" toggle organizes projects into categorized cluster sections complete with section headers and count badges.
+
 
 ## Project marks
 

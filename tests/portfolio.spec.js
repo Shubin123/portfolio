@@ -9,8 +9,19 @@ async function open(page) {
     ] });
     return route.fulfill({ json: { login: 'Shubin123', public_repos: 999, followers: 4 } });
   });
-  await page.goto('./');
-  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.goto('./');
+      break;
+    } catch (err) {
+      if (attempt < 2 && String(err).includes('ERR_CONNECTION_RESET')) {
+        await page.waitForTimeout(100);
+        continue;
+      }
+      throw err;
+    }
+  }
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27, { timeout: 10000 });
 }
 test('latest public gists are available in the visible sidebar widget', async ({ page }) => {
   await open(page);
@@ -197,4 +208,95 @@ test('gist count updates from GitHub instead of staying on a stale cached profil
   await page.locator('#refresh-btn').click();
   await expect(page.locator('#gists-count-badge')).toHaveText('613');
   await expect(page.locator('#gists-status')).toHaveText('613 public gists');
+});
+
+test('tag bar displays available project tag clusters with counts and filters projects interactively', async ({ page }) => {
+  await open(page);
+  const tagBar = page.locator('#tag-bar');
+  await expect(tagBar).toBeVisible();
+
+  const allPill = tagBar.locator('.tag-pill[data-tag=""]');
+  await expect(allPill).toBeVisible();
+  await expect(allPill).toHaveClass(/is-active/);
+  await expect(allPill.locator('.tag-count')).toHaveText('27');
+
+  const aiPill = tagBar.locator('.tag-pill[data-tag="ai"]');
+  await expect(aiPill).toBeVisible();
+  const countText = await aiPill.locator('.tag-count').textContent();
+  const aiCount = Number(countText);
+  expect(aiCount).toBeGreaterThan(0);
+
+  // Click #ai tag to cluster/filter
+  await aiPill.click();
+  await expect(aiPill).toHaveClass(/is-active/);
+  await expect(allPill).not.toHaveClass(/is-active/);
+  await expect(page.locator('#repo-count')).toContainText('Tagged "ai"');
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(aiCount);
+
+  // Clicking active tag pill again toggles it off back to All
+  await aiPill.click();
+  await expect(allPill).toHaveClass(/is-active/);
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27);
+  await expect(page.locator('#repo-count')).toHaveText('Showing 27 of 32 public repositories · 5 forks hidden');
+});
+
+test('clicking a topic chip on a project card clusters projects by that tag', async ({ page }) => {
+  await open(page);
+  const kokoroCard = page.locator('.card').filter({ has: page.getByRole('link', { name: 'kokorojs', exact: true }) });
+  const aiChip = kokoroCard.locator('.topic-chip[data-tag="ai"]');
+  await expect(aiChip).toBeVisible();
+  await aiChip.click();
+
+  const aiPill = page.locator('#tag-bar .tag-pill[data-tag="ai"]');
+  await expect(aiPill).toHaveClass(/is-active/);
+  await expect(page.locator('#repo-count')).toContainText('Tagged "ai"');
+
+  const visibleCards = page.locator('.card:not(.skeleton)');
+  const count = await visibleCards.count();
+  expect(count).toBeGreaterThan(0);
+  for (let i = 0; i < count; i++) {
+    await expect(visibleCards.nth(i).locator('.topic-chip.is-active')).toBeVisible();
+  }
+});
+
+test('cluster view mode organizes projects into cluster sections with headers and count badges', async ({ page }) => {
+  await open(page);
+  const clusterSwitch = page.getByLabel('Cluster by tag');
+  await clusterSwitch.check();
+
+  await expect(page.locator('#repo-grid')).toHaveClass(/is-clustered/);
+  const clusterGroups = page.locator('.cluster-group');
+  expect(await clusterGroups.count()).toBeGreaterThan(1);
+
+  const firstHeader = clusterGroups.first().locator('.cluster-header');
+  await expect(firstHeader).toBeVisible();
+  await expect(firstHeader.locator('.cluster-title')).toBeVisible();
+  await expect(firstHeader.locator('.cluster-badge')).toBeVisible();
+
+  // Focus a specific cluster
+  const focusBtn = firstHeader.locator('.cluster-filter-btn');
+  if (await focusBtn.isVisible()) {
+    await focusBtn.click();
+    await expect(page.locator('#repo-count')).toContainText('Tagged');
+  }
+
+  // Toggle off cluster view returns to normal grid
+  await clusterSwitch.uncheck();
+  await expect(page.locator('#repo-grid')).not.toHaveClass(/is-clustered/);
+});
+
+test('tag filtering and text search combine seamlessly with clear filters action', async ({ page }) => {
+  await open(page);
+  await page.locator('#tag-bar .tag-pill[data-tag="ai"]').click();
+  await page.getByLabel('Search projects', { exact: true }).fill('kokoro');
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(1);
+  await expect(page.getByRole('link', { name: 'kokorojs', exact: true })).toBeVisible();
+
+  await page.getByLabel('Search projects', { exact: true }).fill('no-such-term-ai-xyz');
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(0);
+  await expect(page.locator('.empty-state')).toBeVisible();
+
+  await page.locator('.empty-state button').click();
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27);
+  await expect(page.locator('#tag-bar .tag-pill[data-tag=""]')).toHaveClass(/is-active/);
 });

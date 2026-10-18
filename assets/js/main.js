@@ -61,6 +61,145 @@ const ICON_EXTERNAL =
   '<line x1="7" y1="17" x2="17" y2="7"></line><polyline points="8,7 17,7 17,16"></polyline>' +
   "</svg>";
 
+const MAX_COLLAPSED_TAGS = 14;
+
+const CLUSTER_PRIORITY = [
+  "desert-ant",
+  "ai",
+  "machine-learning",
+  "robotics",
+  "graphics",
+  "hardware",
+  "tools",
+  "game",
+  "scraping",
+  "backend",
+  "finance",
+  "audio",
+  "emulator",
+  "visualization",
+  "education",
+  "web",
+];
+
+const PROJECT_TAGS_MAP = {
+  // Desert Ant AI pipeline demos & tools
+  "desert-ant-video-pipeline": ["desert-ant", "ai", "video", "pipeline"],
+  "desert-ant-eye-demo": ["desert-ant", "ai", "vision", "demo"],
+  "desert-ant-face-demo": ["desert-ant", "ai", "vision", "demo"],
+  "desert-ant-schemer-demo": ["desert-ant", "ai", "demo"],
+  "desert-ant-toxic-demo": ["desert-ant", "ai", "moderation", "demo"],
+  "desert-ant-who-demo": ["desert-ant", "ai", "demo"],
+  "desert-ant-align-demo": ["desert-ant", "ai", "speech", "demo"],
+  "desert-ant-clear-demo": ["desert-ant", "ai", "speech", "demo"],
+  "desert-ant-clips-demo": ["desert-ant", "ai", "video", "demo"],
+  "desert-ant-ear-demo": ["desert-ant", "ai", "speech", "demo"],
+  "desert-ant-emo-demo": ["desert-ant", "ai", "speech", "demo"],
+  "desert-ant-gist-demo": ["desert-ant", "ai", "demo"],
+  "desert-ant-moderator-demo": ["desert-ant", "ai", "moderation", "demo"],
+  "desert-ant-redact-demo": ["desert-ant", "ai", "moderation", "demo"],
+  "desert-ant-shapes-demo": ["desert-ant", "ai", "vision", "demo"],
+  "desert-ant-title-demo": ["desert-ant", "ai", "demo"],
+  "desert-ant-tongue-demo": ["desert-ant", "ai", "speech", "demo"],
+  "desert-ant-uhm-demo": ["desert-ant", "ai", "speech", "demo"],
+  "desert-ant-voz-demo": ["desert-ant", "ai", "speech", "demo"],
+
+  // Graphics & 3D
+  "gameglwfopengl": ["graphics", "opengl", "cpp"],
+  "opengl-examples": ["graphics", "opengl", "cpp"],
+  "cg-fall-2026": ["graphics", "opengl"],
+  "cubesolver": ["graphics", "threejs", "visualization"],
+  "6dof-gym-web": ["robotics", "simulation", "threejs", "web"],
+  "vslam_gym": ["robotics", "computer-vision", "webgpu", "ai"],
+  "vul": ["graphics", "vulkan", "cpp"],
+  "zom": ["graphics", "vulkan"],
+
+  // AI & Machine Learning
+  "classifier": ["ai", "machine-learning", "vision"],
+  "food_model": ["ai", "computer-vision", "python"],
+  "gobot": ["ai", "game"],
+  "kokorojs": ["ai", "speech", "web"],
+  "ml-loop": ["ai", "optimization"],
+  "oma-harness": ["ai", "python"],
+  "gemini-cli": ["tools", "cli", "ai"],
+  "card-battle-agent-lab": ["ai", "game"],
+  "petals": ["ai", "distributed"],
+  "aimjs": ["ai", "computer-vision", "arduino", "web"],
+
+  // Hardware & Embedded
+  "avr_visual": ["hardware", "arduino", "visualization"],
+  "nrf-research-firmware": ["hardware", "embedded"],
+  "arduino-web": ["hardware", "arduino", "web"],
+  "gpi-case2-bt-controller": ["hardware", "bluetooth"],
+
+  // Tools & macOS
+  "terminalbar": ["tools", "macos"],
+  "viewbar": ["tools", "macos"],
+  "dashtop": ["tools", "monitoring", "dashboard"],
+  "keydropper": ["tools", "macos"],
+  "wynncraft-quicklaunch": ["tools", "gaming"],
+
+  // Web & Backend
+  "backendgraphql": ["backend", "graphql", "django"],
+  "django-polls-app": ["backend", "django", "python"],
+  "portfolio": ["web", "portfolio"],
+  "gemini-browser": ["web", "developer-tools"],
+  "csc320-concept-atlas": ["education", "visualization", "web"],
+  "azahar": ["web", "audio"],
+  "azahar_web": ["web", "audio"],
+  "dolphin_web": ["emulator", "web"],
+  "pcsx2_web": ["emulator", "web"],
+  "qemu_web": ["emulator", "web"],
+  "xemu_web": ["emulator", "web"],
+  "flix": ["web", "media"],
+  "netgraph": ["visualization", "network", "web"],
+
+  // Data & Scraping
+  "amazon-scraper": ["scraping", "python"],
+  "ruby-web-crawler": ["scraping", "ruby"],
+  "stonk": ["finance", "desktop-app"],
+  "ff26-weekly-draft-picks": ["ai", "sports-analytics", "python"],
+
+  // Games & Audio
+  "doge": ["game", "lua"],
+  "doom_ball": ["game", "graphics"],
+  "submarine": ["game"],
+  "space-loop": ["game", "graphics"],
+  "possess": ["game"],
+  "whyfightree": ["game"],
+  "tile-editor": ["game", "tools"],
+  "midi": ["audio", "music"],
+};
+
+function getRepoTags(repo) {
+  const set = new Set();
+  if (Array.isArray(repo.topics)) {
+    for (const t of repo.topics) {
+      if (t) set.add(String(t).toLowerCase().trim());
+    }
+  }
+  const key = (repo.name || "").toLowerCase();
+  if (key.startsWith("desert-ant-")) {
+    set.add("desert-ant");
+    set.add("ai");
+  }
+  if (PROJECT_TAGS_MAP[key]) {
+    for (const t of PROJECT_TAGS_MAP[key]) {
+      set.add(t.toLowerCase().trim());
+    }
+  }
+  return Array.from(set);
+}
+
+function getPrimaryCluster(repo) {
+  const tags = getRepoTags(repo);
+  if (!tags.length) return "other";
+  for (const prio of CLUSTER_PRIORITY) {
+    if (tags.includes(prio)) return prio;
+  }
+  return tags[0];
+}
+
 const state = {
   repos: [],
   reposLoaded: false,
@@ -72,6 +211,9 @@ const state = {
   search: "",
   sort: "updated",
   showForks: false,
+  activeTag: null,
+  clusterView: false,
+  tagsExpanded: false,
 };
 
 const els = {
@@ -83,6 +225,8 @@ const els = {
   search: document.getElementById("search"),
   sort: document.getElementById("sort"),
   showForks: document.getElementById("show-forks"),
+  clusterView: document.getElementById("cluster-view"),
+  tagBar: document.getElementById("tag-bar"),
   avatarRing: document.getElementById("avatar-ring"),
   avatar: document.getElementById("avatar"),
   displayName: document.getElementById("display-name"),
@@ -100,6 +244,13 @@ const els = {
   gistsList: document.getElementById("gists-list"),
   gistsStatus: document.getElementById("gists-status"),
 };
+
+function getProjectIcon(name) {
+  if (typeof projectIconUrl === "function") {
+    return projectIconUrl(name);
+  }
+  return "assets/icons/project.svg";
+}
 
 init();
 
@@ -125,6 +276,12 @@ function bindControls() {
     state.showForks = e.target.checked;
     render();
   });
+  if (els.clusterView) {
+    els.clusterView.addEventListener("change", (e) => {
+      state.clusterView = e.target.checked;
+      render();
+    });
+  }
   els.refreshBtn.addEventListener("click", () => {
     loadRepos(true);
     loadProfile(true);
@@ -483,13 +640,17 @@ function writeCache(key, data) {
 function filterAndSort(repos) {
   let list = repos.filter((r) => !r.private);
   if (!state.showForks) list = list.filter((r) => !r.fork);
+  if (state.activeTag) {
+    const target = state.activeTag.toLowerCase();
+    list = list.filter((r) => getRepoTags(r).includes(target));
+  }
   if (state.search.trim()) {
     const q = state.search.trim().toLowerCase();
     list = list.filter(
       (r) =>
         r.name.toLowerCase().includes(q) ||
         (r.description || "").toLowerCase().includes(q) ||
-        (r.topics || []).some((t) => t.toLowerCase().includes(q))
+        getRepoTags(r).some((t) => t.toLowerCase().includes(q))
     );
   }
   return [...list].sort(sortComparator(state.sort));
@@ -514,19 +675,240 @@ function render() {
   els.grid.innerHTML = "";
 
   renderRepoStats();
+  renderTagBar();
   const repos = publicRepos();
   const forks = repos.filter((repo) => repo.fork).length;
-  els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+
+  if (state.activeTag) {
+    els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories · Tagged "${state.activeTag}"${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+  } else if (state.clusterView) {
+    els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories across tag clusters${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+  } else {
+    els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+  }
 
   if (filtered.length === 0) {
+    els.grid.classList.remove("is-clustered");
     const empty = document.createElement("div");
     empty.className = "empty-state";
     empty.textContent = repos.length ? "No projects match your filters." : "No public repositories yet.";
+    if (repos.length && (state.activeTag || state.search.trim())) {
+      const resetBtn = document.createElement("button");
+      resetBtn.type = "button";
+      resetBtn.className = "retry-button";
+      resetBtn.textContent = "Clear filters";
+      resetBtn.style.marginTop = "12px";
+      resetBtn.addEventListener("click", () => {
+        state.activeTag = null;
+        state.search = "";
+        if (els.search) els.search.value = "";
+        render();
+      });
+      empty.appendChild(resetBtn);
+    }
     els.grid.appendChild(empty);
     return;
   }
 
-  filtered.forEach((repo, i) => els.grid.appendChild(buildCard(repo, i)));
+  if (state.clusterView) {
+    renderClusteredGrid(filtered);
+  } else {
+    els.grid.classList.remove("is-clustered");
+    filtered.forEach((repo, i) => els.grid.appendChild(buildCard(repo, i)));
+  }
+}
+
+function renderTagBar() {
+  if (!els.tagBar) return;
+  els.tagBar.replaceChildren();
+
+  const repos = publicRepos();
+  let availableRepos = repos;
+  if (!state.showForks) {
+    availableRepos = availableRepos.filter((r) => !r.fork);
+  }
+
+  if (availableRepos.length === 0) {
+    els.tagBar.hidden = true;
+    return;
+  }
+
+  const tagCounts = new Map();
+  for (const repo of availableRepos) {
+    const tags = getRepoTags(repo);
+    for (const tag of tags) {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    }
+  }
+
+  if (tagCounts.size === 0) {
+    els.tagBar.hidden = true;
+    return;
+  }
+
+  els.tagBar.hidden = false;
+
+  const allBtn = document.createElement("button");
+  allBtn.type = "button";
+  const isAllActive = !state.activeTag;
+  allBtn.className = `tag-pill${isAllActive ? " is-active" : ""}`;
+  allBtn.setAttribute("aria-pressed", String(isAllActive));
+  allBtn.setAttribute("data-tag", "");
+  
+  const allLabel = document.createElement("span");
+  allLabel.textContent = "All";
+  allBtn.appendChild(allLabel);
+
+  const allCount = document.createElement("span");
+  allCount.className = "tag-count";
+  allCount.textContent = availableRepos.length;
+  allBtn.appendChild(allCount);
+
+  allBtn.addEventListener("click", () => {
+    if (state.activeTag !== null) {
+      state.activeTag = null;
+      render();
+    }
+  });
+  els.tagBar.appendChild(allBtn);
+
+  const sortedTags = Array.from(tagCounts.entries()).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return a[0].localeCompare(b[0]);
+  });
+
+  const shouldCollapse = sortedTags.length > MAX_COLLAPSED_TAGS && !state.tagsExpanded;
+  const visibleTags = shouldCollapse
+    ? sortedTags.slice(0, MAX_COLLAPSED_TAGS)
+    : [...sortedTags];
+
+  if (shouldCollapse && state.activeTag && !visibleTags.some(([t]) => t === state.activeTag)) {
+    const activeEntry = sortedTags.find(([t]) => t === state.activeTag);
+    if (activeEntry) visibleTags.push(activeEntry);
+  }
+
+  visibleTags.forEach(([tag, count]) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    const isActive = state.activeTag === tag;
+    btn.className = `tag-pill${isActive ? " is-active" : ""}`;
+    btn.setAttribute("aria-pressed", String(isActive));
+    btn.setAttribute("data-tag", tag);
+    btn.setAttribute("aria-label", `Filter projects by #${tag} (${count} projects)`);
+
+    const label = document.createElement("span");
+    label.textContent = `#${tag}`;
+    btn.appendChild(label);
+
+    const countEl = document.createElement("span");
+    countEl.className = "tag-count";
+    countEl.textContent = count;
+    btn.appendChild(countEl);
+
+    btn.addEventListener("click", () => {
+      state.activeTag = state.activeTag === tag ? null : tag;
+      render();
+    });
+
+    els.tagBar.appendChild(btn);
+  });
+
+  if (sortedTags.length > MAX_COLLAPSED_TAGS) {
+    const moreBtn = document.createElement("button");
+    moreBtn.type = "button";
+    moreBtn.className = "tag-toggle-more";
+    if (state.tagsExpanded) {
+      moreBtn.textContent = "Show fewer";
+      moreBtn.title = `Collapse back to top ${MAX_COLLAPSED_TAGS} tags`;
+    } else {
+      const remaining = sortedTags.length - visibleTags.length;
+      moreBtn.textContent = `+${remaining} more`;
+      moreBtn.title = `Show all ${sortedTags.length} tags`;
+    }
+    moreBtn.addEventListener("click", () => {
+      state.tagsExpanded = !state.tagsExpanded;
+      renderTagBar();
+    });
+    els.tagBar.appendChild(moreBtn);
+  }
+}
+
+function renderClusteredGrid(filteredRepos) {
+  els.grid.innerHTML = "";
+  els.grid.classList.add("is-clustered");
+
+  const clusterMap = new Map();
+  for (const repo of filteredRepos) {
+    const cluster = state.activeTag || getPrimaryCluster(repo);
+    if (!clusterMap.has(cluster)) {
+      clusterMap.set(cluster, []);
+    }
+    clusterMap.get(cluster).push(repo);
+  }
+
+  const sortedClusters = Array.from(clusterMap.entries()).sort((a, b) => {
+    if (a[0] === "other") return 1;
+    if (b[0] === "other") return -1;
+    return b[1].length - a[1].length || a[0].localeCompare(b[0]);
+  });
+
+  let cardIndex = 0;
+  for (const [clusterName, clusterRepos] of sortedClusters) {
+    const section = document.createElement("section");
+    section.className = "cluster-group";
+    section.setAttribute("data-cluster", clusterName);
+
+    const header = document.createElement("div");
+    header.className = "cluster-header";
+
+    const titleWrap = document.createElement("div");
+    titleWrap.className = "cluster-title-wrap";
+
+    const title = document.createElement("h3");
+    title.className = "cluster-title";
+    title.textContent = clusterName === "other" ? "Other Projects" : `#${clusterName}`;
+    titleWrap.appendChild(title);
+
+    const badge = document.createElement("span");
+    badge.className = "cluster-badge";
+    badge.textContent = `${clusterRepos.length} project${clusterRepos.length === 1 ? "" : "s"}`;
+    titleWrap.appendChild(badge);
+
+    header.appendChild(titleWrap);
+
+    if (!state.activeTag && clusterName !== "other") {
+      const filterBtn = document.createElement("button");
+      filterBtn.type = "button";
+      filterBtn.className = "cluster-filter-btn";
+      filterBtn.textContent = "Focus cluster";
+      filterBtn.title = `Show only #${clusterName} projects`;
+      filterBtn.addEventListener("click", () => {
+        state.activeTag = clusterName;
+        render();
+      });
+      header.appendChild(filterBtn);
+    } else if (state.activeTag) {
+      const clearBtn = document.createElement("button");
+      clearBtn.type = "button";
+      clearBtn.className = "cluster-filter-btn";
+      clearBtn.textContent = "Show all clusters";
+      clearBtn.title = "View all clusters";
+      clearBtn.addEventListener("click", () => {
+        state.activeTag = null;
+        render();
+      });
+      header.appendChild(clearBtn);
+    }
+
+    section.appendChild(header);
+
+    const cardGrid = document.createElement("div");
+    cardGrid.className = "cluster-cards";
+    clusterRepos.forEach((repo) => cardGrid.appendChild(buildCard(repo, cardIndex++)));
+    section.appendChild(cardGrid);
+
+    els.grid.appendChild(section);
+  }
 }
 
 function buildCard(repo, index = 0) {
@@ -550,7 +932,7 @@ function buildCard(repo, index = 0) {
   link.textContent = repo.name;
   const icon = document.createElement("img");
   icon.className = "project-icon";
-  icon.src = projectIconUrl(repo.name);
+  icon.src = getProjectIcon(repo.name);
   icon.alt = "";
   icon.width = 48;
   icon.height = 48;
@@ -571,13 +953,29 @@ function buildCard(repo, index = 0) {
   desc.textContent = repo.description || "No description provided.";
   card.appendChild(desc);
 
-  if (repo.topics && repo.topics.length) {
+  const tags = getRepoTags(repo);
+  if (tags.length) {
     const topicsEl = document.createElement("div");
     topicsEl.className = "topics";
-    repo.topics.slice(0, 6).forEach((t) => {
-      const chip = document.createElement("span");
-      chip.className = "topic-chip";
-      chip.textContent = t;
+    let displayTags = tags.slice(0, 6);
+    if (state.activeTag && tags.includes(state.activeTag) && !displayTags.includes(state.activeTag)) {
+      displayTags = [state.activeTag, ...tags.filter((t) => t !== state.activeTag).slice(0, 5)];
+    }
+    displayTags.forEach((t) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      const isActive = state.activeTag === t;
+      chip.className = `topic-chip${isActive ? " is-active" : ""}`;
+      chip.textContent = `#${t}`;
+      chip.setAttribute("aria-label", `Filter by tag #${t}`);
+      chip.setAttribute("aria-pressed", String(isActive));
+      chip.setAttribute("data-tag", t);
+      chip.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        state.activeTag = state.activeTag === t ? null : t;
+        render();
+      });
       topicsEl.appendChild(chip);
     });
     card.appendChild(topicsEl);
