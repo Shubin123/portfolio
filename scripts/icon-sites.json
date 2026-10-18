@@ -65,6 +65,11 @@
     "deployed": "app-icon.svg",
     "header": false
   },
+  "qemu_web": {
+    "source": "web/favicon.svg",
+    "deployed": "favicon.svg",
+    "header": false
+  },
   "csc320-concept-atlas": {
     "source": "app-icon.svg",
     "deployed": "app-icon.svg",

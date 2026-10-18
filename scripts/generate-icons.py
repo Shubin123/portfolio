@@ -74,6 +74,7 @@ MARKS = {
 'flix': ('lime', '<path d="M26 16h23v7H33v9h13v7H33v12h-7V16Z"/><circle cx="16" cy="19" r="2" fill="currentColor"/><circle cx="16" cy="32" r="2" fill="currentColor"/><circle cx="16" cy="45" r="2" fill="currentColor"/>'),
 'petals': ('green', '<ellipse cx="32" cy="20" rx="7" ry="12"/><ellipse cx="32" cy="44" rx="7" ry="12"/><ellipse cx="20" cy="32" rx="12" ry="7"/><ellipse cx="44" cy="32" rx="12" ry="7"/><circle cx="32" cy="32" r="6" fill="currentColor"/>'),
 'xemu_web': ('lime', '<path d="m17 16 30 32m0-32L17 48" stroke-width="7"/>'),
+'qemu_web': ('blue', '<rect x="11" y="12" width="28" height="23" rx="3"/><path d="m16 20.5 4 3.5-4 3.5m6 0h5M25 35v5M16 40h18"/><rect x="43" y="14" width="10" height="36" rx="2"/><path d="M46 20h4m-4 5h4m-4 5h4"/><circle cx="48" cy="44" r="1.2" fill="currentColor"/>'),
 'project': ('blue','<rect x="14" y="17" width="36" height="33" rx="5"/><path d="M14 25h36m-27 7-5 5 5 5m18-10 5 5-5 5m-6-11-6 13"/>'),
 }
 PALETTE = {'space':('#0b111a','#a4ead3'),'possess':('#1e2438','#9db4f0'),'blue':('#192b3b','#88caff'),'gold':('#302b18','#e3d17f'),'green':('#19352e','#8ce2bf'),'pink':('#342337','#f2b0d5'),'lime':('#243223','#bbe495'),'cyan':('#19353a','#8adce4'),'purple':('#27263d','#b7b2ff'),'coral':('#3c2721','#ffb299'),'stonk':('#23301c','#d7fc70')}
