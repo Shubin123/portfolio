@@ -11,7 +11,8 @@ const describe = process.env.LIVE ? test.describe : test.describe.skip;
 describe('deployed sites', () => {
   for (const [repo, paths] of Object.entries(sites)) {
     test(`${repo} serves the same mark as its portfolio card`, async ({ page, request }) => {
-      const site = `https://${USER}.github.io/${repo}/`;
+      // A repo moved to another owner keeps its own site URL in icon-sites.json.
+      const site = paths.site || `https://${USER}.github.io/${repo}/`;
       const response = await page.goto(site, { waitUntil: 'domcontentloaded' });
       expect(response.status(), site).toBe(200);
 
@@ -32,4 +33,12 @@ describe('deployed sites', () => {
       expect((await deployed.text()).trim()).toBe(local.trim());
     });
   }
+});
+
+describe('entry points', () => {
+  test('the bare user site redirects to the portfolio', async ({ page }) => {
+    await page.goto(`https://${USER.toLowerCase()}.github.io/`);
+    await expect(page).toHaveURL(`https://${USER.toLowerCase()}.github.io/portfolio/`);
+    await expect(page.locator('#profile-link')).toHaveAttribute('href', `https://github.com/${USER}`);
+  });
 });

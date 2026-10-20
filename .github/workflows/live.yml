@@ -1,0 +1,25 @@
+name: live
+
+# Checks the real deployments: every project site's mark, and that
+# https://shubin123.github.io/ still lands on the portfolio.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  live:
+    # These checks hit this account's real deployments, so forks skip them.
+    if: github.repository_owner == 'Shubin123'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:live

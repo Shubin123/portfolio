@@ -101,6 +101,7 @@
     "header": false
   },
   "spend_track": {
+    "site": "https://spendtrack-app.github.io/spend_track/",
     "source": "app-icon.svg",
     "deployed": "app-icon.svg",
     "header": false

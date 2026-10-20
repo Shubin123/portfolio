@@ -1,5 +1,10 @@
-// Change this to switch whose public GitHub projects are shown.
-const GITHUB_USERNAME = "Shubin123";
+// Whose public GitHub projects are shown. On GitHub Pages the account is read
+// from the address (<user>.github.io), so a fork shows its owner's projects
+// with no edits; anywhere else (local preview, custom domain) this default is used.
+const DEFAULT_GITHUB_USERNAME = "Shubin123";
+const PAGES_HOST = location.hostname.match(/^([a-z0-9-]+)\.github\.io$/i);
+const GITHUB_USERNAME = PAGES_HOST ? PAGES_HOST[1] : DEFAULT_GITHUB_USERNAME;
+document.title = `${GITHUB_USERNAME} — Projects`;
 
 // GitHub's unauthenticated API allows only 60 requests/hour per visitor IP,
 // and conditional (ETag) requests still consume that quota even on a 304 —
@@ -244,6 +249,10 @@ const els = {
   gistsList: document.getElementById("gists-list"),
   gistsStatus: document.getElementById("gists-status"),
 };
+
+// The static links in index.html name the default account; point them at the one shown.
+els.profileLink.href = `https://github.com/${GITHUB_USERNAME}`;
+els.gistsLink.href = `https://gist.github.com/${GITHUB_USERNAME}`;
 
 function getProjectIcon(name) {
   if (typeof projectIconUrl === "function") {
