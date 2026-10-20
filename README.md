@@ -48,9 +48,14 @@ and the site it links to read as one project.
 ## Tests
 
 `npm test` runs the Playwright suite against a local server: the count
-relationships above, cache/late-response races, icon integrity, Pages links, and
-the grid's column growth from phone width to 2560px. `npm run test:live` is the
-opt-in network check described above.
+relationships above, cache/late-response races, icon integrity, Pages links,
+the grid's column growth from phone width to 2560px, and a fork served from
+another account's Pages address showing that account. `npm run test:live` is the
+opt-in network check described above. It also checks that
+`https://shubin123.github.io/` still redirects to the portfolio.
+
+GitHub Actions run both: `e2e` (icons and the local suite) on every push and
+pull request, and `live` on every push to `main` and daily.
 
 Because the GitHub REST API only returns public repositories for
 unauthenticated requests, the page can never expose private projects.
@@ -65,13 +70,55 @@ immediate check of repos, profile, and gists without waiting out the cache windo
 (e.g. rate limited), the page falls back to the cached copy and says how old
 it is.
 
-## Changing the GitHub account
+## Fork it for your own account
 
-Edit the constant at the top of `assets/js/main.js`:
+The page works out which account to show from its own address: served from
+`https://<you>.github.io/portfolio/`, it lists `<you>`'s public repos, profile
+and gists. You don't need to edit any code.
 
-```js
-const GITHUB_USERNAME = "Shubin123";
-```
+1. **Fork** this repo: the **Fork** button at the top of
+   [Shubin123/portfolio](https://github.com/Shubin123/portfolio). You can keep
+   the name `portfolio` or rename it. The page works under any repo name.
+2. In your fork, open **Settings → Pages** and set **Source** to
+   *Deploy from a branch*, branch `main`, folder `/ (root)`, then **Save**.
+   Forks don't inherit Pages settings, so this step is required.
+3. Wait a minute for the first deploy, then visit
+   `https://<you>.github.io/portfolio/`.
+4. *(Optional)* Set the fork's **About → Website** to that URL so it shows on
+   the repo page.
+
+What carries over and what doesn't:
+
+- **Your projects show up automatically.** The repo grid, profile header,
+  "View on GitHub" link, gist widget and Pages links all use your account.
+- **Project marks** are drawn for this account's repos. Your repos get the
+  generic fallback mark until you add entries to `scripts/generate-icons.py`.
+- **Local preview and custom domains** can't infer an account from the
+  address, so they use the default at the top of `assets/js/main.js`. Change
+  it to your username if you preview locally or use your own domain:
+
+  ```js
+  const DEFAULT_GITHUB_USERNAME = "Shubin123";
+  ```
+
+- **CI**: GitHub turns Actions off in new forks. Enable them on the fork's
+  **Actions** tab to get the `e2e` checks on every push and pull request.
+  The `live` workflow checks this account's real deployments, so it skips
+  itself in forks.
+
+### Make `https://<you>.github.io/` open the portfolio too
+
+GitHub serves the bare user address from a repo named exactly
+`<you>.github.io`. [Shubin123/shubin123.github.io](https://github.com/Shubin123/shubin123.github.io)
+is a one-page redirect that sends visitors to `/portfolio/` on whichever
+account serves it:
+
+1. Click **Use this template → Create a new repository**, or fork it and rename
+   the fork.
+2. Name the new repo `<you>.github.io`. The name must match your username.
+3. If you renamed your portfolio fork, change `/portfolio/` in its
+   `index.html` to the new name.
+4. Turn on Pages (`main`, root) as above if GitHub hasn't already.
 
 ## Running locally
 

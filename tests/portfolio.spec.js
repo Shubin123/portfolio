@@ -300,3 +300,31 @@ test('tag filtering and text search combine seamlessly with clear filters action
   await expect(page.locator('.card:not(.skeleton)')).toHaveCount(27);
   await expect(page.locator('#tag-bar .tag-pill[data-tag=""]')).toHaveClass(/is-active/);
 });
+test('a fork served from another account\'s Pages site shows that account, not the default', async ({ page, request, baseURL }) => {
+  // Serve the local files as if they were deployed at https://forker.github.io/portfolio/.
+  await page.route('https://forker.github.io/portfolio/**', async route => {
+    const file = new URL(route.request().url()).pathname.replace(/^\/portfolio\//, '') || 'index.html';
+    const response = await request.get(new URL(file, baseURL + '/').href);
+    return route.fulfill({ response });
+  });
+  const own = repos.filter(repo => !repo.fork).slice(0, 3).map(repo => ({ ...repo, owner: { login: 'forker' } }));
+  const asked = [];
+  await page.route('https://api.github.com/**', route => {
+    const url = route.request().url();
+    asked.push(url);
+    if (url.includes('/repos?')) return route.fulfill({ json: own });
+    if (url.includes('/gists?')) return route.fulfill({ json: [] });
+    return route.fulfill({ json: { login: 'forker', html_url: 'https://github.com/forker', public_repos: 3, followers: 0 } });
+  });
+  await page.goto('https://forker.github.io/portfolio/');
+  await expect(page.locator('.card:not(.skeleton)')).toHaveCount(3, { timeout: 10000 });
+  await expect(page).toHaveTitle('forker — Projects');
+  await expect(page.locator('#display-name')).toHaveText('forker');
+  await expect(page.locator('#profile-link')).toHaveAttribute('href', 'https://github.com/forker');
+  await expect(page.locator('#gists-link')).toHaveAttribute('href', 'https://gist.github.com/forker');
+  expect(asked.length).toBeGreaterThan(0);
+  expect(asked.every(url => url.includes('/users/forker'))).toBe(true);
+  const { name, has_pages } = own[0];
+  const card = page.locator('.card').filter({ has: page.getByRole('link', { name, exact: true }) });
+  if (has_pages) await expect(card.locator('.pages-cta')).toHaveAttribute('href', `https://forker.github.io/${name}/`);
+});
