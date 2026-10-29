@@ -151,9 +151,9 @@ def js_array_strings(name):
     return {tag for array in re.findall(r'\[([^\]]*)\]', block) for tag in re.findall(r'"([^"]+)"', array)}
 
 
-def github(path):
+def github(path, token=True):
     headers = {'Accept': 'application/vnd.github+json', 'User-Agent': 'portfolio-translate'}
-    if os.environ.get('GITHUB_TOKEN'):
+    if token and os.environ.get('GITHUB_TOKEN'):
         headers['Authorization'] = f"Bearer {os.environ['GITHUB_TOKEN']}"
     with urllib.request.urlopen(urllib.request.Request(f'https://api.github.com{path}', headers=headers)) as res:
         return json.load(res)
@@ -170,15 +170,9 @@ def github_text():
             break
         page += 1
     repos = [repo for repo in repos if not repo.get('private')]
-    # A token for this account also lists its secret gists, so page until there are 100 public ones.
-    gists, page = [], 1
-    while len(gists) < 100:
-        batch = github(f'/users/{USER}/gists?per_page=100&page={page}')
-        gists += [gist for gist in batch if gist.get('public') is not False]
-        if len(batch) < 100:
-            break
-        page += 1
-    gists = gists[:100]
+    # Anonymous, like the page: a token for this account would also list its secret
+    # gists, and the gist endpoints refuse a GitHub Actions token outright.
+    gists = [gist for gist in github(f'/users/{USER}/gists?per_page=100', token=False) if gist.get('public') is not False]
 
     content = {profile.get('bio') or ''} | {repo.get('description') or '' for repo in repos}
     content |= {gist.get('description') or '' for gist in gists}
