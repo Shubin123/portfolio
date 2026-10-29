@@ -328,3 +328,79 @@ test('a fork served from another account\'s Pages site shows that account, not t
   const card = page.locator('.card').filter({ has: page.getByRole('link', { name, exact: true }) });
   if (has_pages) await expect(card.locator('.pages-cta')).toHaveAttribute('href', `https://forker.github.io/${name}/`);
 });
+
+test('translate menu switches the whole page to the DeepL Chinese dictionary and back, and remembers the choice', async ({ page }) => {
+  const zh = require('../assets/i18n/zh.json');
+  const fill = (template, vars) => template.replace(/\{(\w+)\}/g, (_, name) => String(vars[name]));
+  const dictionaryRequests = [];
+  page.on('request', request => { if (request.url().endsWith('/assets/i18n/zh.json')) dictionaryRequests.push(request.url()); });
+  await open(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(dictionaryRequests).toHaveLength(0); // English visitors never download the dictionary
+
+  const toggle = page.locator('#lang-toggle');
+  await expect(toggle).toHaveAccessibleName('Translate this page');
+  await expect(page.locator('#lang-current')).toHaveText('English');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#lang-options')).toBeVisible();
+  await expect(page.getByRole('menuitemradio', { name: 'English' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('menuitemradio', { name: '中文（简体）' }).click();
+
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(page.locator('#lang-options')).toBeHidden();
+  await expect(page.locator('#lang-current')).toHaveText('中文');
+  await expect(toggle).toHaveAccessibleName(zh.strings['Translate this page']);
+  // Static markup, attributes, JS-rendered UI, GitHub content, and tags are all translated.
+  await expect(page).toHaveTitle(fill(zh.strings['{user} — Projects'], { user: 'Shubin123' }));
+  await expect(page.locator('#projects-heading')).toHaveText(zh.strings['A live feed of my public repositories']);
+  await expect(page.locator('#search')).toHaveAttribute('placeholder', zh.strings['Search projects by name, description, or topic…']);
+  await expect(page.locator('#sort option[value="stars"]')).toHaveText(zh.strings['Most stars']);
+  await expect(page.locator('#refresh-label')).toHaveText(zh.strings['Refresh']);
+  const pattern = template => new RegExp(`^${template.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{\w+\}/g, '.+')}$`);
+  await expect(page.locator('#status')).toHaveText(pattern(zh.strings['Last updated {time}']));
+  await expect(page.locator('#repo-count')).toHaveText(`${fill(zh.strings['Showing {shown} of {total} public repositories'], { shown: 27, total: 32 })} · ${fill(zh.strings['{count} forks hidden'], { count: 5 })}`);
+  await expect(page.locator('#profile-stats')).toContainText(fill(zh.strings['{count} public repos'], { count: 32 }));
+  await expect(page.locator('#fork-label')).toHaveText(fill(zh.strings['Include forks ({count})'], { count: 5 }));
+  await expect(page.locator('#gists-heading')).toHaveText(zh.strings['Latest gists']);
+  await expect(page.locator('#gists-status')).toHaveText(fill(zh.strings['{count} public gists'], { count: 2 }));
+  const card = name => page.locator('.card').filter({ has: page.getByRole('link', { name, exact: true }) });
+  const aimjs = card('aimjs');
+  await expect(aimjs.locator('.card-desc')).toHaveText(zh.strings['Object Detection and Cursor Control using Javascript.']);
+  await expect(aimjs.locator('.pages-cta')).toHaveText(zh.strings['View live site']);
+  await expect(aimjs.locator('.topic-chip[data-tag="browser"]')).toHaveText(`#${zh.tags.browser}`);
+  await expect(card('vul').locator('.card-desc')).toHaveText(zh.strings['No description provided.']);
+  // Gist text missing from the dictionary falls back to English instead of disappearing.
+  await expect(page.getByRole('link', { name: 'Useful script', exact: true })).toBeVisible();
+  // Searching and tag filters work with the translated text.
+  await page.locator('#search').fill(zh.tags.browser);
+  await expect(page.locator('#repo-count')).toContainText(fill(zh.strings['Showing {shown} of {total} public repositories'], { shown: 27, total: 32 }));
+  await page.locator('#search').fill('');
+  await page.locator('.tag-pill[data-tag="browser"]').click();
+  await expect(page.locator('#repo-count')).toContainText(`“${zh.tags.browser}”`);
+
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(page.locator('#refresh-label')).toHaveText(zh.strings['Refresh']);
+
+  await toggle.click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#lang-options')).toBeHidden();
+  await expect(toggle).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('menuitemradio', { name: '中文（简体）' })).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('#lang-current')).toHaveText('English');
+  await expect(page).toHaveTitle('Shubin123 — Projects');
+  await expect(page.locator('#refresh-label')).toHaveText('Refresh');
+  await expect(page.locator('#repo-count')).toHaveText('Showing 27 of 32 public repositories · 5 forks hidden');
+  await expect(aimjs.locator('.card-desc')).toHaveText('Object Detection and Cursor Control using Javascript.');
+  await expect(page.locator('#search')).toHaveAttribute('placeholder', 'Search projects by name, description, or topic…');
+});
+
+test('every UI string has a Chinese translation', async () => {
+  const { execFileSync } = require('child_process');
+  execFileSync('python3', ['scripts/translate.py', '--check'], { cwd: require('path').join(__dirname, '..') });
+});

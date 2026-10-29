@@ -4,7 +4,7 @@
 const DEFAULT_GITHUB_USERNAME = "Shubin123";
 const PAGES_HOST = location.hostname.match(/^([a-z0-9-]+)\.github\.io$/i);
 const GITHUB_USERNAME = PAGES_HOST ? PAGES_HOST[1] : DEFAULT_GITHUB_USERNAME;
-document.title = `${GITHUB_USERNAME} — Projects`;
+document.title = t("{user} — Projects", { user: GITHUB_USERNAME });
 
 // GitHub's unauthenticated API allows only 60 requests/hour per visitor IP,
 // and conditional (ETag) requests still consume that quota even on a 304 —
@@ -179,8 +179,8 @@ const PROJECT_TAGS_MAP = {
 function getRepoTags(repo) {
   const set = new Set();
   if (Array.isArray(repo.topics)) {
-    for (const t of repo.topics) {
-      if (t) set.add(String(t).toLowerCase().trim());
+    for (const topic of repo.topics) {
+      if (topic) set.add(String(topic).toLowerCase().trim());
     }
   }
   const key = (repo.name || "").toLowerCase();
@@ -189,8 +189,8 @@ function getRepoTags(repo) {
     set.add("ai");
   }
   if (PROJECT_TAGS_MAP[key]) {
-    for (const t of PROJECT_TAGS_MAP[key]) {
-      set.add(t.toLowerCase().trim());
+    for (const tag of PROJECT_TAGS_MAP[key]) {
+      set.add(tag.toLowerCase().trim());
     }
   }
   return Array.from(set);
@@ -219,6 +219,9 @@ const state = {
   activeTag: null,
   clusterView: false,
   tagsExpanded: false,
+  profileFailed: false,
+  gistsFailed: false,
+  reposError: null,
 };
 
 const els = {
@@ -254,6 +257,9 @@ const els = {
 els.profileLink.href = `https://github.com/${GITHUB_USERNAME}`;
 els.gistsLink.href = `https://gist.github.com/${GITHUB_USERNAME}`;
 
+// Status lines are kept as functions so a language switch can re-render them.
+let statusRenderer = () => t("Loading projects…");
+
 function getProjectIcon(name) {
   if (typeof projectIconUrl === "function") {
     return projectIconUrl(name);
@@ -267,9 +273,30 @@ function init() {
   bindControls();
   bindGistsControls();
   renderSkeleton();
+  initLanguage(applyLanguage);
   loadProfile();
   loadRepos();
   loadGists();
+}
+
+// Re-renders everything JS wrote, in the newly selected language. Static markup
+// is handled by applyStaticTranslations() before this runs.
+function applyLanguage() {
+  document.title = t("{user} — Projects", { user: GITHUB_USERNAME });
+  els.status.textContent = statusRenderer();
+  setRefreshing(els.refreshBtn.disabled);
+  toggleGistsWidget(state.gistsCollapsed);
+  if (state.profile) {
+    renderProfile(state.profile);
+  } else {
+    els.displayName.textContent = state.profileFailed ? GITHUB_USERNAME : t("Loading…");
+    renderRepoStats();
+  }
+  if (state.reposLoaded) render();
+  else if (state.reposError) renderError(state.reposError);
+  if (state.profile || state.gists.length) renderGists();
+  if (state.gistsFailed) els.gistsStatus.textContent = t("Gists are unavailable right now.");
+  else if (!state.profile && !state.gists.length) els.gistsStatus.textContent = t("Loading gists…");
 }
 
 function bindControls() {
@@ -340,8 +367,8 @@ function toggleGistsWidget(forceState) {
   if (els.gistsToggle) {
     els.gistsToggle.setAttribute("aria-expanded", String(!nextCollapsed));
     els.gistsToggle.title = nextCollapsed
-      ? "Pull down gists widget"
-      : "Collapse gists widget to expand projects pane";
+      ? t("Pull down gists widget")
+      : t("Collapse gists widget to expand projects pane");
   }
   if (els.gistsBody) {
     els.gistsBody.hidden = nextCollapsed;
@@ -363,18 +390,21 @@ async function loadProfile(force = false) {
     renderGists();
   } catch {
     // Non-fatal — the repo grid is the important part, profile header can stay minimal.
-    if (!cached) els.displayName.textContent = GITHUB_USERNAME;
+    if (!cached) {
+      state.profileFailed = true;
+      els.displayName.textContent = GITHUB_USERNAME;
+    }
   }
 }
 
 function renderProfile(profile) {
   if (profile.avatar_url) {
     els.avatar.src = profile.avatar_url;
-    els.avatar.alt = `${profile.login} avatar`;
+    els.avatar.alt = t("{login} avatar", { login: profile.login });
     els.avatarRing.hidden = false;
   }
   els.displayName.textContent = profile.name || profile.login;
-  els.bio.textContent = profile.bio || "";
+  els.bio.textContent = profile.bio ? t(profile.bio) : "";
   state.profile = profile;
   renderRepoStats();
   els.profileLink.href = profile.html_url || els.profileLink.href;
@@ -397,11 +427,13 @@ async function loadGists(force = false) {
   try {
     const gists = await fetchJSON(`https://api.github.com/users/${GITHUB_USERNAME}/gists?per_page=100`);
     state.gists = gists;
+    state.gistsFailed = false;
     writeCache(GISTS_CACHE_KEY, gists);
     renderGists();
   } catch {
     if (!cached) {
-      els.gistsStatus.textContent = "Gists are unavailable right now.";
+      state.gistsFailed = true;
+      els.gistsStatus.textContent = t("Gists are unavailable right now.");
     }
   }
 }
@@ -417,8 +449,9 @@ function filterGists(gists, query) {
   const q = query.trim().toLowerCase();
   return gists.filter((gist) => {
     const desc = (gist.description || "").toLowerCase();
+    const translatedDesc = gist.description ? t(gist.description).toLowerCase() : "";
     const files = Object.keys(gist.files || {}).join(" ").toLowerCase();
-    return desc.includes(q) || files.includes(q);
+    return desc.includes(q) || translatedDesc.includes(q) || files.includes(q);
   });
 }
 
@@ -446,20 +479,20 @@ function renderGists() {
 
   if (query) {
     if (filtered.length === 0) {
-      els.gistsStatus.textContent = `No gists match "${query}".`;
+      els.gistsStatus.textContent = t('No gists match "{query}".', { query });
     } else {
-      els.gistsStatus.textContent = `Showing ${filtered.length} of ${total.toLocaleString()} public gists`;
+      els.gistsStatus.textContent = t("Showing {shown} of {total} public gists", { shown: filtered.length, total: total.toLocaleString() });
     }
   } else {
     els.gistsStatus.textContent = total
-      ? `${total.toLocaleString()} public gist${total === 1 ? "" : "s"}`
-      : "No public gists yet.";
+      ? plural(total, "{count} public gist", "{count} public gists")
+      : t("No public gists yet.");
   }
 
   if (filtered.length === 0 && query) {
     const empty = document.createElement("li");
     empty.className = "gist-empty";
-    empty.textContent = "Try searching for a different file or keyword.";
+    empty.textContent = t("Try searching for a different file or keyword.");
     els.gistsList.appendChild(empty);
     removeMoreBtn();
     return;
@@ -476,13 +509,13 @@ function renderGists() {
     link.className = "gist-title";
     const files = Object.keys(gist.files || {});
     const primaryFile = files[0] || "";
-    link.textContent = gist.description || primaryFile || "Untitled gist";
+    link.textContent = gist.description ? t(gist.description) : primaryFile || t("Untitled gist");
     item.appendChild(link);
     const meta = document.createElement("span");
     meta.className = "gist-meta";
     const fileCount = files.length;
     const fileDesc = gist.description && primaryFile ? `${primaryFile} · ` : "";
-    meta.textContent = `${fileDesc}${fileCount} file${fileCount === 1 ? "" : "s"} · Updated ${relativeTime(gist.updated_at)}`;
+    meta.textContent = `${fileDesc}${plural(fileCount, "{count} file", "{count} files")} · ${t("Updated {time}", { time: relativeTime(gist.updated_at) })}`;
     item.appendChild(meta);
     els.gistsList.appendChild(item);
   });
@@ -515,11 +548,11 @@ function updateMoreBtn(totalItems, query) {
 
   if (state.gistsLimit < totalItems) {
     const remaining = totalItems - state.gistsLimit;
-    btn.textContent = `Show more (${Math.min(5, remaining)} more)`;
-    btn.title = `Show 5 more of ${totalItems} loaded gists`;
+    btn.textContent = t("Show more ({count} more)", { count: Math.min(5, remaining) });
+    btn.title = t("Show 5 more of {total} loaded gists", { total: totalItems });
   } else {
-    btn.textContent = "Show less";
-    btn.title = `Collapse back to latest ${DEFAULT_GISTS_TO_SHOW} gists`;
+    btn.textContent = t("Show less");
+    btn.title = t("Collapse back to latest {count} gists", { count: DEFAULT_GISTS_TO_SHOW });
   }
 }
 
@@ -537,18 +570,22 @@ function renderRepoStats() {
   const repos = publicRepos();
   const forks = repos.filter((repo) => repo.fork).length;
   const stats = state.reposLoaded ? [
-    [repos.length, "public repos"],
-    [repos.length - forks, "non-forks"],
-    [forks, "forks"],
+    [repos.length, t("{count} public repos", { count: repos.length.toLocaleString() })],
+    [repos.length - forks, t("{count} non-forks", { count: (repos.length - forks).toLocaleString() })],
+    [forks, t("{count} forks", { count: forks.toLocaleString() })],
   ] : [];
-  if (Number.isFinite(state.profile?.followers)) stats.push([state.profile.followers, "followers"]);
-  for (const [value, label] of stats) {
+  if (Number.isFinite(state.profile?.followers)) {
+    stats.push([state.profile.followers, t("{count} followers", { count: state.profile.followers.toLocaleString() })]);
+  }
+  for (const [, label] of stats) {
     const pill = document.createElement("span");
     pill.className = "stat-pill";
-    pill.textContent = `${value.toLocaleString()} ${label}`;
+    pill.textContent = label;
     els.profileStats.appendChild(pill);
   }
-  document.getElementById("fork-label").textContent = `Include forks${state.reposLoaded ? ` (${forks})` : ""}`;
+  document.getElementById("fork-label").textContent = state.reposLoaded
+    ? t("Include forks ({count})", { count: forks })
+    : t("Include forks");
 }
 
 async function loadRepos(force = false) {
@@ -564,21 +601,26 @@ async function loadRepos(force = false) {
     return; // fresh cache — skip the network call to stay within GitHub's unauthenticated rate limit
   }
 
-  if (!cached) setStatus("Loading projects…");
+  if (!cached) setStatus(() => t("Loading projects…"));
   setRefreshing(true);
 
   try {
     const fresh = await fetchAllRepos();
     state.repos = fresh;
     state.reposLoaded = true;
+    state.reposError = null;
     const now = Date.now();
     writeCache(REPOS_CACHE_KEY, fresh);
     render();
     setLastUpdated(now);
   } catch (err) {
     if (cached) {
-      setStatus(`Couldn't refresh (${err.message}) — last updated ${relativeTime(new Date(cached.timestamp).toISOString())}`);
+      setStatus(() => t("Couldn't refresh ({error}) — last updated {time}", {
+        error: errorMessage(err),
+        time: relativeTime(new Date(cached.timestamp).toISOString()),
+      }));
     } else {
+      state.reposError = err;
       renderError(err);
     }
   } finally {
@@ -587,13 +629,13 @@ async function loadRepos(force = false) {
 }
 
 function setLastUpdated(timestamp) {
-  setStatus(`Last updated ${relativeTime(new Date(timestamp).toISOString())}`);
+  setStatus(() => t("Last updated {time}", { time: relativeTime(new Date(timestamp).toISOString()) }));
 }
 
 function setRefreshing(isRefreshing) {
   els.refreshBtn.disabled = isRefreshing;
   els.refreshBtn.classList.toggle("is-refreshing", isRefreshing);
-  els.refreshLabel.textContent = isRefreshing ? "Refreshing…" : "Refresh";
+  els.refreshLabel.textContent = isRefreshing ? t("Refreshing…") : t("Refresh");
 }
 
 async function fetchAllRepos() {
@@ -615,14 +657,26 @@ async function fetchJSON(url) {
   });
   if (!res.ok) {
     if (res.status === 403 && res.headers.get("x-ratelimit-remaining") === "0") {
-      throw new Error("GitHub API rate limit reached, try again later");
+      throw localizedError("GitHub API rate limit reached, try again later");
     }
     if (res.status === 404) {
-      throw new Error(`GitHub user "${GITHUB_USERNAME}" not found`);
+      throw localizedError('GitHub user "{user}" not found', { user: GITHUB_USERNAME });
     }
-    throw new Error(`GitHub API error (${res.status})`);
+    throw localizedError("GitHub API error ({status})", { status: res.status });
   }
   return res.json();
+}
+
+// Keeps the English template so the message can be shown again after a language switch.
+function localizedError(template, vars) {
+  const err = new Error(t(template, vars));
+  err.template = template;
+  err.vars = vars;
+  return err;
+}
+
+function errorMessage(err) {
+  return err.template ? t(err.template, err.vars) : err.message;
 }
 
 function readCache(key, ttlMs) {
@@ -659,7 +713,8 @@ function filterAndSort(repos) {
       (r) =>
         r.name.toLowerCase().includes(q) ||
         (r.description || "").toLowerCase().includes(q) ||
-        getRepoTags(r).some((t) => t.toLowerCase().includes(q))
+        (r.description ? t(r.description) : "").toLowerCase().includes(q) ||
+        getRepoTags(r).some((tag) => tag.toLowerCase().includes(q) || tagLabel(tag).toLowerCase().includes(q))
     );
   }
   return [...list].sort(sortComparator(state.sort));
@@ -688,24 +743,28 @@ function render() {
   const repos = publicRepos();
   const forks = repos.filter((repo) => repo.fork).length;
 
+  const counts = { shown: filtered.length, total: repos.length };
+  let countText;
   if (state.activeTag) {
-    els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories · Tagged "${state.activeTag}"${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+    countText = t('Showing {shown} of {total} public repositories · Tagged "{tag}"', { ...counts, tag: tagLabel(state.activeTag) });
   } else if (state.clusterView) {
-    els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories across tag clusters${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+    countText = t("Showing {shown} of {total} public repositories across tag clusters", counts);
   } else {
-    els.count.textContent = `Showing ${filtered.length} of ${repos.length} public repositories${!state.showForks && forks ? ` · ${forks} forks hidden` : ""}`;
+    countText = t("Showing {shown} of {total} public repositories", counts);
   }
+  if (!state.showForks && forks) countText += ` · ${t("{count} forks hidden", { count: forks })}`;
+  els.count.textContent = countText;
 
   if (filtered.length === 0) {
     els.grid.classList.remove("is-clustered");
     const empty = document.createElement("div");
     empty.className = "empty-state";
-    empty.textContent = repos.length ? "No projects match your filters." : "No public repositories yet.";
+    empty.textContent = repos.length ? t("No projects match your filters.") : t("No public repositories yet.");
     if (repos.length && (state.activeTag || state.search.trim())) {
       const resetBtn = document.createElement("button");
       resetBtn.type = "button";
       resetBtn.className = "retry-button";
-      resetBtn.textContent = "Clear filters";
+      resetBtn.textContent = t("Clear filters");
       resetBtn.style.marginTop = "12px";
       resetBtn.addEventListener("click", () => {
         state.activeTag = null;
@@ -765,7 +824,7 @@ function renderTagBar() {
   allBtn.setAttribute("data-tag", "");
   
   const allLabel = document.createElement("span");
-  allLabel.textContent = "All";
+  allLabel.textContent = t("All");
   allBtn.appendChild(allLabel);
 
   const allCount = document.createElement("span");
@@ -803,10 +862,10 @@ function renderTagBar() {
     btn.className = `tag-pill${isActive ? " is-active" : ""}`;
     btn.setAttribute("aria-pressed", String(isActive));
     btn.setAttribute("data-tag", tag);
-    btn.setAttribute("aria-label", `Filter projects by #${tag} (${count} projects)`);
+    btn.setAttribute("aria-label", t("Filter projects by #{tag} ({count} projects)", { tag: tagLabel(tag), count }));
 
     const label = document.createElement("span");
-    label.textContent = `#${tag}`;
+    label.textContent = `#${tagLabel(tag)}`;
     btn.appendChild(label);
 
     const countEl = document.createElement("span");
@@ -827,12 +886,12 @@ function renderTagBar() {
     moreBtn.type = "button";
     moreBtn.className = "tag-toggle-more";
     if (state.tagsExpanded) {
-      moreBtn.textContent = "Show fewer";
-      moreBtn.title = `Collapse back to top ${MAX_COLLAPSED_TAGS} tags`;
+      moreBtn.textContent = t("Show fewer");
+      moreBtn.title = t("Collapse back to top {count} tags", { count: MAX_COLLAPSED_TAGS });
     } else {
       const remaining = sortedTags.length - visibleTags.length;
-      moreBtn.textContent = `+${remaining} more`;
-      moreBtn.title = `Show all ${sortedTags.length} tags`;
+      moreBtn.textContent = t("+{count} more", { count: remaining });
+      moreBtn.title = t("Show all {count} tags", { count: sortedTags.length });
     }
     moreBtn.addEventListener("click", () => {
       state.tagsExpanded = !state.tagsExpanded;
@@ -875,12 +934,12 @@ function renderClusteredGrid(filteredRepos) {
 
     const title = document.createElement("h3");
     title.className = "cluster-title";
-    title.textContent = clusterName === "other" ? "Other Projects" : `#${clusterName}`;
+    title.textContent = clusterName === "other" ? t("Other Projects") : `#${tagLabel(clusterName)}`;
     titleWrap.appendChild(title);
 
     const badge = document.createElement("span");
     badge.className = "cluster-badge";
-    badge.textContent = `${clusterRepos.length} project${clusterRepos.length === 1 ? "" : "s"}`;
+    badge.textContent = plural(clusterRepos.length, "{count} project", "{count} projects");
     titleWrap.appendChild(badge);
 
     header.appendChild(titleWrap);
@@ -889,8 +948,8 @@ function renderClusteredGrid(filteredRepos) {
       const filterBtn = document.createElement("button");
       filterBtn.type = "button";
       filterBtn.className = "cluster-filter-btn";
-      filterBtn.textContent = "Focus cluster";
-      filterBtn.title = `Show only #${clusterName} projects`;
+      filterBtn.textContent = t("Focus cluster");
+      filterBtn.title = t("Show only #{tag} projects", { tag: tagLabel(clusterName) });
       filterBtn.addEventListener("click", () => {
         state.activeTag = clusterName;
         render();
@@ -900,8 +959,8 @@ function renderClusteredGrid(filteredRepos) {
       const clearBtn = document.createElement("button");
       clearBtn.type = "button";
       clearBtn.className = "cluster-filter-btn";
-      clearBtn.textContent = "Show all clusters";
-      clearBtn.title = "View all clusters";
+      clearBtn.textContent = t("Show all clusters");
+      clearBtn.title = t("View all clusters");
       clearBtn.addEventListener("click", () => {
         state.activeTag = null;
         render();
@@ -952,14 +1011,14 @@ function buildCard(repo, index = 0) {
   heading.appendChild(link);
   titleRow.appendChild(heading);
 
-  if (repo.fork) { const badge = makeBadge("Fork"); badge.title = "A copy of an existing repository"; titleRow.appendChild(badge); }
-  if (repo.archived) titleRow.appendChild(makeBadge("Archived"));
+  if (repo.fork) { const badge = makeBadge(t("Fork")); badge.title = t("A copy of an existing repository"); titleRow.appendChild(badge); }
+  if (repo.archived) titleRow.appendChild(makeBadge(t("Archived")));
 
   card.appendChild(titleRow);
 
   const desc = document.createElement("p");
   desc.className = "card-desc";
-  desc.textContent = repo.description || "No description provided.";
+  desc.textContent = repo.description ? t(repo.description) : t("No description provided.");
   card.appendChild(desc);
 
   const tags = getRepoTags(repo);
@@ -970,19 +1029,19 @@ function buildCard(repo, index = 0) {
     if (state.activeTag && tags.includes(state.activeTag) && !displayTags.includes(state.activeTag)) {
       displayTags = [state.activeTag, ...tags.filter((t) => t !== state.activeTag).slice(0, 5)];
     }
-    displayTags.forEach((t) => {
+    displayTags.forEach((tag) => {
       const chip = document.createElement("button");
       chip.type = "button";
-      const isActive = state.activeTag === t;
+      const isActive = state.activeTag === tag;
       chip.className = `topic-chip${isActive ? " is-active" : ""}`;
-      chip.textContent = `#${t}`;
-      chip.setAttribute("aria-label", `Filter by tag #${t}`);
+      chip.textContent = `#${tagLabel(tag)}`;
+      chip.setAttribute("aria-label", t("Filter by tag #{tag}", { tag: tagLabel(tag) }));
       chip.setAttribute("aria-pressed", String(isActive));
-      chip.setAttribute("data-tag", t);
+      chip.setAttribute("data-tag", tag);
       chip.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        state.activeTag = state.activeTag === t ? null : t;
+        state.activeTag = state.activeTag === tag ? null : tag;
         render();
       });
       topicsEl.appendChild(chip);
@@ -1006,11 +1065,11 @@ function buildCard(repo, index = 0) {
     meta.appendChild(langEl);
   }
 
-  meta.appendChild(makeMetaItem(ICON_STAR, countLabel(repo.stargazers_count, "star")));
+  meta.appendChild(makeMetaItem(ICON_STAR, plural(repo.stargazers_count, "{count} star", "{count} stars")));
   // "of this repo" separates a repo's own fork count from the Fork badge, which
   // says this repo is itself a fork of someone else's.
-  meta.appendChild(makeMetaItem(ICON_FORK, `${countLabel(repo.forks_count, "fork")} of this repo`));
-  meta.appendChild(makeMetaItem(null, `Updated ${relativeTime(repo.pushed_at)}`));
+  meta.appendChild(makeMetaItem(ICON_FORK, plural(repo.forks_count, "{count} fork of this repo", "{count} forks of this repo")));
+  meta.appendChild(makeMetaItem(null, t("Updated {time}", { time: relativeTime(repo.pushed_at) })));
 
   card.appendChild(meta);
 
@@ -1035,7 +1094,7 @@ function buildPagesCta(url) {
   cta.rel = "noopener noreferrer";
 
   const label = document.createElement("span");
-  label.textContent = "View live site";
+  label.textContent = t("View live site");
   cta.appendChild(label);
 
   const icon = document.createElement("span");
@@ -1050,10 +1109,6 @@ function makeBadge(text) {
   badge.className = "badge";
   badge.textContent = text;
   return badge;
-}
-
-function countLabel(value, noun) {
-  return `${value.toLocaleString()} ${noun}${value === 1 ? "" : "s"}`;
 }
 
 function makeMetaItem(iconSvg, text) {
@@ -1085,27 +1140,28 @@ function renderError(err) {
   wrap.className = "error-state";
 
   const msg = document.createElement("p");
-  msg.textContent = `Couldn't load projects: ${err.message}`;
+  msg.textContent = t("Couldn't load projects: {error}", { error: errorMessage(err) });
   wrap.appendChild(msg);
 
   const retry = document.createElement("button");
   retry.className = "retry-button";
-  retry.textContent = "Retry";
+  retry.textContent = t("Retry");
   retry.addEventListener("click", () => loadRepos(true));
   wrap.appendChild(retry);
 
   els.grid.appendChild(wrap);
-  setStatus("");
+  setStatus(() => "");
 }
 
-function setStatus(text) {
-  els.status.textContent = text;
+function setStatus(render) {
+  statusRenderer = render;
+  els.status.textContent = render();
 }
 
 function relativeTime(dateStr) {
   const date = new Date(dateStr);
   const seconds = Math.round((date - Date.now()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat(currentLocale(), { numeric: "auto" });
   const divisions = [
     { amount: 60, unit: "second" },
     { amount: 60, unit: "minute" },
