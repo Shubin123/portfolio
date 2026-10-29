@@ -62,11 +62,13 @@ DEEPL_AUTH_KEY=... npm run translate -- --lang fr,de # only some languages
 npm run check:i18n                                   # offline: fail if any UI string lacks a translation
 ```
 
-The `translate` workflow runs the script on every push to `main` with the
-repo's `DEEPL_AUTH_KEY` secret, commits the dictionaries if anything changed
-("Update translations"), then runs `e2e` on that commit. Re-run it from the
-**Actions** tab to pick up a repo or gist published since; until then it shows
-in English.
+The `translate` workflow runs the script on every push to `main` and daily at
+23:20 UTC with the repo's `DEEPL_AUTH_KEY` secret, commits the dictionaries if
+anything changed ("Update translations"), then runs `e2e` on that commit. Only
+text not yet translated goes to DeepL, so a new repo or gist costs its own
+description and a day with nothing new costs nothing; each run logs the
+month's DeepL usage. Run it from the **Actions** tab to pick up something new
+right away.
 
 To add a language, add it to `LANGUAGES` in `scripts/translate.py` and push (or
 run the script yourself).

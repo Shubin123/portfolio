@@ -1,12 +1,16 @@
 name: translate
 
-# On every push to main: translate whatever is new (UI strings, repo and gist
-# descriptions, tags) with DeepL, commit the dictionaries, then run e2e on the
-# translated commit. A commit pushed with the workflow's token doesn't trigger
-# other workflows, so e2e is called from here instead of on push.
+# On every push to main and once a day: translate whatever is new (UI strings,
+# repo and gist descriptions, tags) with DeepL, commit the dictionaries, then
+# run e2e on the translated commit. Only untranslated text is sent, so a day
+# with no new repos or gists costs nothing. A commit pushed with the workflow's
+# token doesn't trigger other workflows, so e2e is called from here instead of
+# on push.
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '20 23 * * *'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +27,7 @@ jobs:
       cancel-in-progress: false
     outputs:
       sha: ${{ steps.commit.outputs.sha }}
+      committed: ${{ steps.commit.outputs.committed }}
     steps:
       - uses: actions/checkout@v4
       - name: Translate
@@ -46,12 +51,14 @@ jobs:
             git commit --quiet -m "Update translations"
             git pull --rebase --quiet origin main
             git push --quiet origin HEAD:main
+            echo "committed=true" >> "$GITHUB_OUTPUT"
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   e2e:
     needs: translate
-    if: ${{ !cancelled() }}
+    # A daily run only has something to test when it committed translations.
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.translate.outputs.committed == 'true') }}
     uses: ./.github/workflows/e2e.yml
     with:
       ref: ${{ needs.translate.outputs.sha }}

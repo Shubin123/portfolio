@@ -474,7 +474,9 @@ def main():
             changed = write_if_changed(path, dictionary_text(lang, dictionary))
             print(f"{lang}: translated {count} new strings and tags; "
                   f"{path.relative_to(root)} {'updated' if changed else 'is up to date'}.")
-        print(f'Sent {deepl.characters} characters to DeepL.')
+        usage = deepl.call('GET', '/v2/usage')
+        print(f"Sent {deepl.characters:,} characters to DeepL; {usage['character_count']:,} of "
+              f"{usage['character_limit']:,} used this billing period.")
     if write_if_changed(LANGUAGES_JS, languages_js()):
         print(f'Wrote {LANGUAGES_JS.relative_to(root)}.')
 
