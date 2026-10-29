@@ -62,9 +62,14 @@ DEEPL_AUTH_KEY=... npm run translate -- --lang fr,de # only some languages
 npm run check:i18n                                   # offline: fail if any UI string lacks a translation
 ```
 
-To add a language, add it to `LANGUAGES` in `scripts/translate.py` and run the
-script. A repo or gist published after the last run shows in English until the
-script runs again.
+The `translate` workflow runs the script on every push to `main` with the
+repo's `DEEPL_AUTH_KEY` secret, commits the dictionaries if anything changed
+("Update translations"), then runs `e2e` on that commit. Re-run it from the
+**Actions** tab to pick up a repo or gist published since; until then it shows
+in English.
+
+To add a language, add it to `LANGUAGES` in `scripts/translate.py` and push (or
+run the script yourself).
 
 ## Project marks
 
@@ -93,8 +98,9 @@ another account's Pages address showing that account. `npm run test:live` is the
 opt-in network check described above. It also checks that
 `https://shubin123.github.io/` still redirects to the portfolio.
 
-GitHub Actions run both: `e2e` (icons and the local suite) on every push and
-pull request, and `live` on every push to `main` and daily.
+GitHub Actions run both: `e2e` (icons and the local suite) on every pull
+request and, after `translate`, every push to `main`; and `live` on every push
+to `main` and daily.
 
 Because the GitHub REST API only returns public repositories for
 unauthenticated requests, the page can never expose private projects.
@@ -143,7 +149,9 @@ What carries over and what doesn't:
 - **CI**: GitHub turns Actions off in new forks. Enable them on the fork's
   **Actions** tab to get the `e2e` checks on every push and pull request.
   The `live` workflow checks this account's real deployments, so it skips
-  itself in forks.
+  itself in forks. `translate` only translates when the repo has a
+  `DEEPL_AUTH_KEY` secret, and then for the account set in
+  `DEFAULT_GITHUB_USERNAME`.
 
 ### Make `https://<you>.github.io/` open the portfolio too
 

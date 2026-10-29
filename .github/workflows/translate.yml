@@ -1,0 +1,57 @@
+name: translate
+
+# On every push to main: translate whatever is new (UI strings, repo and gist
+# descriptions, tags) with DeepL, commit the dictionaries, then run e2e on the
+# translated commit. A commit pushed with the workflow's token doesn't trigger
+# other workflows, so e2e is called from here instead of on push.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # One at a time, so two pushes never race to commit translations.
+    concurrency:
+      group: translate
+      cancel-in-progress: false
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Translate
+        env:
+          DEEPL_AUTH_KEY: ${{ secrets.DEEPL_AUTH_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$DEEPL_AUTH_KEY" ]; then
+            echo "::notice::No DEEPL_AUTH_KEY secret, so the dictionaries stay as they are."
+            exit 0
+          fi
+          python3 scripts/translate.py
+      - name: Commit translations
+        id: commit
+        run: |
+          git add assets/i18n assets/js/languages.js
+          if ! git diff --cached --quiet; then
+            # Committed as whoever triggered the run.
+            git config user.name "${{ github.actor }}"
+            git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+            git commit --quiet -m "Update translations"
+            git pull --rebase --quiet origin main
+            git push --quiet origin HEAD:main
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  e2e:
+    needs: translate
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/e2e.yml
+    with:
+      ref: ${{ needs.translate.outputs.sha }}

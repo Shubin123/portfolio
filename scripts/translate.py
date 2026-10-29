@@ -85,6 +85,7 @@ HINTS = {
 REWORDED = {'Focus cluster': 'Show only this cluster'}
 # A bare tag like "vision" or "gemini" is ambiguous, so tags are translated inside a sentence.
 TAG_FRAME = 'Software project topic: <t>{}</t>'
+GLOSSARY_PREFIX = 'portfolio-github-terms-'
 # Placeholders go to DeepL as sample values. PLAIN ones go in as plain text, which
 # DeepL words a sentence around far better than a tag ("25 stars" rather than a
 # 25-star rating, "Updated 3 days ago" rather than "Updated v<ph>"), and are found
@@ -169,7 +170,15 @@ def github_text():
             break
         page += 1
     repos = [repo for repo in repos if not repo.get('private')]
-    gists = [gist for gist in github(f'/users/{USER}/gists?per_page=100') if gist.get('public') is not False]
+    # A token for this account also lists its secret gists, so page until there are 100 public ones.
+    gists, page = [], 1
+    while len(gists) < 100:
+        batch = github(f'/users/{USER}/gists?per_page=100&page={page}')
+        gists += [gist for gist in batch if gist.get('public') is not False]
+        if len(batch) < 100:
+            break
+        page += 1
+    gists = gists[:100]
 
     content = {profile.get('bio') or ''} | {repo.get('description') or '' for repo in repos}
     content |= {gist.get('description') or '' for gist in gists}
@@ -183,6 +192,7 @@ class DeepL:
         self.key = key
         self.base = 'https://api-free.deepl.com' if key.endswith(':fx') else 'https://api.deepl.com'
         self.glossary_ids = {}  # language -> glossary id, at most one at a time
+        self.leftovers_dropped = False
         self.phrases = {}
         self.characters = 0
 
@@ -212,13 +222,23 @@ class DeepL:
         for lang in [lang for lang in self.glossary_ids if lang != keep]:
             self.call('DELETE', f'/v2/glossaries/{self.glossary_ids.pop(lang)}')
 
+    def drop_leftover_glossaries(self):
+        """Deletes glossaries a killed run (e.g. a cancelled CI job) left behind, which would use up Free's one."""
+        if self.leftovers_dropped:
+            return
+        self.leftovers_dropped = True
+        for glossary in self.call('GET', '/v2/glossaries')['glossaries']:
+            if glossary['name'].startswith(GLOSSARY_PREFIX):
+                self.call('DELETE', f"/v2/glossaries/{glossary['glossary_id']}")
+
     def glossary(self, lang):
         """A temporary glossary of the language's pinned terms. DeepL Free allows only one at a time."""
         self.drop_glossaries(keep=lang)
         entries = LANGUAGES[lang].get('glossary')
         if entries and lang not in self.glossary_ids:
+            self.drop_leftover_glossaries()
             self.glossary_ids[lang] = self.call('POST', '/v2/glossaries', {
-                'name': f'portfolio-github-terms-{lang}', 'source_lang': 'en',
+                'name': GLOSSARY_PREFIX + lang, 'source_lang': 'en',
                 'target_lang': LANGUAGES[lang]['deepl'].split('-')[0].lower(),
                 'entries': '\n'.join(f'{source}\t{target}' for source, target in entries.items()),
                 'entries_format': 'tsv',

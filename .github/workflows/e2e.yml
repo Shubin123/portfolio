@@ -1,16 +1,23 @@
 name: e2e
 
+# Pushes to main run this through translate.yml, after their translations land.
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to test (empty for the triggering one)
+        type: string
+        default: ''
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
