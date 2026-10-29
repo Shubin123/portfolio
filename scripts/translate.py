@@ -82,7 +82,7 @@ HINTS = {
     'Collapse back to top {count} tags': 'Tooltip of a button that shrinks the expanded tag list so it lists only the {count} most used tags again.',
 }
 # Labels DeepL misreads however they're explained go to it reworded, same meaning.
-REWORDED = {'Focus cluster': 'Show only this cluster'}
+REWORDED = {'Focus cluster': 'Show only this cluster', 'Recently pushed': 'Last code push'}
 # A bare tag like "vision" or "gemini" is ambiguous, so tags are translated inside a sentence.
 TAG_FRAME = 'Software project topic: <t>{}</t>'
 GLOSSARY_PREFIX = 'portfolio-github-terms-'
