@@ -333,10 +333,10 @@ test('translate menu switches the whole page to the DeepL Chinese dictionary and
   const zh = require('../assets/i18n/zh.json');
   const fill = (template, vars) => template.replace(/\{(\w+)\}/g, (_, name) => String(vars[name]));
   const dictionaryRequests = [];
-  page.on('request', request => { if (request.url().endsWith('/assets/i18n/zh.json')) dictionaryRequests.push(request.url()); });
+  page.on('request', request => { if (request.url().includes('/assets/i18n/')) dictionaryRequests.push(request.url()); });
   await open(page);
   await page.setViewportSize({ width: 1280, height: 900 });
-  expect(dictionaryRequests).toHaveLength(0); // English visitors never download the dictionary
+  expect(dictionaryRequests).toHaveLength(0); // English visitors never download a dictionary
 
   const toggle = page.locator('#lang-toggle');
   await expect(toggle).toHaveAccessibleName('Translate this page');
@@ -359,11 +359,11 @@ test('translate menu switches the whole page to the DeepL Chinese dictionary and
   await expect(page.locator('#refresh-label')).toHaveText(zh.strings['Refresh']);
   const pattern = template => new RegExp(`^${template.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{\w+\}/g, '.+')}$`);
   await expect(page.locator('#status')).toHaveText(pattern(zh.strings['Last updated {time}']));
-  await expect(page.locator('#repo-count')).toHaveText(`${fill(zh.strings['Showing {shown} of {total} public repositories'], { shown: 27, total: 32 })} · ${fill(zh.strings['{count} forks hidden'], { count: 5 })}`);
-  await expect(page.locator('#profile-stats')).toContainText(fill(zh.strings['{count} public repos'], { count: 32 }));
+  await expect(page.locator('#repo-count')).toHaveText(`${fill(zh.plurals['Showing {shown} of {count} public repositories'].other, { shown: 27, count: 32 })} · ${fill(zh.plurals['{count} forks hidden'].other, { count: 5 })}`);
+  await expect(page.locator('#profile-stats')).toContainText(fill(zh.plurals['{count} public repos'].other, { count: 32 }));
   await expect(page.locator('#fork-label')).toHaveText(fill(zh.strings['Include forks ({count})'], { count: 5 }));
   await expect(page.locator('#gists-heading')).toHaveText(zh.strings['Latest gists']);
-  await expect(page.locator('#gists-status')).toHaveText(fill(zh.strings['{count} public gists'], { count: 2 }));
+  await expect(page.locator('#gists-status')).toHaveText(fill(zh.plurals['{count} public gists'].other, { count: 2 }));
   const card = name => page.locator('.card').filter({ has: page.getByRole('link', { name, exact: true }) });
   const aimjs = card('aimjs');
   await expect(aimjs.locator('.card-desc')).toHaveText(zh.strings['Object Detection and Cursor Control using Javascript.']);
@@ -374,7 +374,7 @@ test('translate menu switches the whole page to the DeepL Chinese dictionary and
   await expect(page.getByRole('link', { name: 'Useful script', exact: true })).toBeVisible();
   // Searching and tag filters work with the translated text.
   await page.locator('#search').fill(zh.tags.browser);
-  await expect(page.locator('#repo-count')).toContainText(fill(zh.strings['Showing {shown} of {total} public repositories'], { shown: 27, total: 32 }));
+  await expect(page.locator('#repo-count')).toContainText(fill(zh.plurals['Showing {shown} of {count} public repositories'].other, { shown: 27, count: 32 }));
   await page.locator('#search').fill('');
   await page.locator('.tag-pill[data-tag="browser"]').click();
   await expect(page.locator('#repo-count')).toContainText(`“${zh.tags.browser}”`);
@@ -400,7 +400,59 @@ test('translate menu switches the whole page to the DeepL Chinese dictionary and
   await expect(page.locator('#search')).toHaveAttribute('placeholder', 'Search projects by name, description, or topic…');
 });
 
-test('every UI string has a Chinese translation', async () => {
+test('each language downloads only when picked, uses its own plural forms, and stays cached until its dictionary changes', async ({ page }) => {
+  const fr = require('../assets/i18n/fr.json');
+  const ru = require('../assets/i18n/ru.json');
+  const fill = (template, vars) => template.replace(/\{(\w+)\}/g, (_, name) => String(vars[name]));
+  const downloads = [];
+  page.on('request', request => { if (request.url().includes('/assets/i18n/')) downloads.push(new URL(request.url()).pathname.split('/').pop()); });
+  const choose = async name => {
+    await page.locator('#lang-toggle').click();
+    await page.getByRole('menuitemradio', { name }).click();
+  };
+  const card = name => page.locator('.card').filter({ has: page.getByRole('link', { name, exact: true }) });
+  await open(page);
+
+  await page.locator('#lang-toggle').click();
+  await expect(page.getByRole('menuitemradio')).toHaveCount(9);
+  await expect(page.getByRole('menuitemradio', { name: 'Français' })).toHaveAttribute('lang', 'fr');
+  await page.keyboard.press('Escape');
+  expect(downloads).toEqual([]);
+
+  await choose('Français');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+  await expect(page.locator('#lang-current')).toHaveText('Français');
+  await expect(page.locator('#projects-heading')).toHaveText(fr.strings['A live feed of my public repositories']);
+  await expect(page.locator('#profile-stats')).toContainText(fill(fr.plurals['{count} public repos'].other, { count: 32 }));
+  await expect(card('aimjs').locator('.card-meta')).toContainText(fill(fr.plurals['{count} stars'].one, { count: 0 })); // French 0 is singular
+  expect(downloads).toEqual(['fr.json']);
+
+  // Russian has three forms for whole numbers: 2 and 32 take one, 0 and 5 another.
+  await choose('Русский');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
+  await expect(page.locator('#gists-status')).toHaveText(fill(ru.plurals['{count} public gists'].few, { count: 2 }));
+  await expect(page.locator('#repo-count')).toHaveText(`${fill(ru.plurals['Showing {shown} of {count} public repositories'].few, { shown: 27, count: 32 })} · ${fill(ru.plurals['{count} forks hidden'].many, { count: 5 })}`);
+  await expect(card('aimjs').locator('.card-meta')).toContainText(fill(ru.plurals['{count} stars'].many, { count: 0 }));
+  expect(downloads).toEqual(['fr.json', 'ru.json']);
+
+  // Going back is served from memory, and a reload from the stored copy, without the network.
+  await choose('Français');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+  await page.reload();
+  await expect(page.locator('#projects-heading')).toHaveText(fr.strings['A live feed of my public repositories']);
+  expect(downloads).toEqual(['fr.json', 'ru.json']);
+
+  // A stored copy of an older dictionary is downloaded again.
+  await page.evaluate(() => {
+    const key = 'gh-portfolio-i18n:fr';
+    localStorage.setItem(key, JSON.stringify({ ...JSON.parse(localStorage.getItem(key)), version: 'old' }));
+  });
+  await page.reload();
+  await expect(page.locator('#projects-heading')).toHaveText(fr.strings['A live feed of my public repositories']);
+  expect(downloads).toEqual(['fr.json', 'ru.json', 'fr.json']);
+});
+
+test('every UI string has a translation in every language', async () => {
   const { execFileSync } = require('child_process');
   execFileSync('python3', ['scripts/translate.py', '--check'], { cwd: require('path').join(__dirname, '..') });
 });

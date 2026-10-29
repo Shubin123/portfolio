@@ -29,7 +29,6 @@
     "Browser-side apple quality classifier: a Vision Transformer fine-tuned on the Fresh and Rotten Fruits dataset, converted to TensorFlow.js and run client-side with IndexedDB weight caching.": "浏览器端苹果质量分类器：一个基于“Fresh and Rotten Fruits”数据集微调的Vision Transformer模型，已转换为TensorFlow.js并在客户端运行，采用IndexedDB进行权重缓存。",
     "CORS-ignored Mouse Position Update": "忽略CORS的鼠标位置更新",
     "Check GitHub for new projects now": "立即查看 GitHub 上的新项目",
-    "Chinese translation by DeepL": "由 DeepL 翻译的中文版本",
     "CircuitPython Web Server with Secrets File": "带密钥文件的 CircuitPython Web 服务器",
     "Clear filters": "清除筛选条件",
     "Clear gist filter": "清除 Gist 筛选条件",
@@ -73,7 +72,6 @@
     "Filter by tag #{tag}": "按标签 #{tag} 筛选",
     "Filter gists": "筛选 Gist",
     "Filter gists by name, file, or description…": "可按名称、文件或描述筛选 Gist……",
-    "Filter projects by #{tag} ({count} projects)": "按 #{tag} 筛选项目（{count}个项目）",
     "Filter projects by tag cluster": "按标签分组筛选项目",
     "Firmware and research tools for Nordic Semiconductor nRF24LU1+ based USB dongles and breakout boards.": "适用于基于 Nordic Semiconductor nRF24LU1+ 的 USB 适配器和扩展板的固件及研究工具。",
     "Fixed Rubik's Cube Implementation": "已修复的魔方实现",
@@ -185,17 +183,11 @@
     "Running RKNN Model Inference Guide": "RKNN 模型推理运行指南",
     "Search projects": "搜索项目",
     "Search projects by name, description, or topic…": "可按名称、描述或主题搜索项目……",
-    "Show 5 more of {total} loaded gists": "显示已加载的{total}个 Gist 中的另外 5 个",
     "Show all clusters": "显示所有分组",
-    "Show all {count} tags": "显示全部{count}个标签",
     "Show fewer": "显示更少",
     "Show less": "显示更少",
     "Show more ({count} more)": "显示更多（还有 {count} 个）",
-    "Show only #{tag} projects": "仅显示 # {tag} 项目",
-    "Showing {shown} of {total} public gists": "显示{shown}个（共{total}个）公开的Gist",
-    "Showing {shown} of {total} public repositories": "显示{shown}个公开仓库（共{total}个）",
-    "Showing {shown} of {total} public repositories across tag clusters": "在标签分组中展示{total}个公开仓库中的{shown}个",
-    "Showing {shown} of {total} public repositories · Tagged \"{tag}\"": "显示 {shown} 个公开仓库（共 {total} 个）· 标签为“{tag}”",
+    "Show only #{tag} projects": "仅显示#{tag}项目",
     "Simple Deterministic Memory Allocator": "简单的确定性内存分配器",
     "Simple Web IDE for Pico Flashing": "用于 Pico 固件刷写的一个简单 Web IDE",
     "Simplified Mouse Movement with Interpolation": "利用插值简化鼠标移动",
@@ -216,6 +208,7 @@
     "Title web demo powered by Desert Ant Labs, with a local Apple Silicon engine": "标题：由 Desert Ant Labs 提供支持的 Web 演示，搭载本地 Apple Silicon 引擎",
     "Translate this page": "翻译此页面",
     "Translation unavailable right now.": "目前暂无翻译。",
+    "Translations by DeepL": "由 DeepL 翻译",
     "Try searching for a different file or keyword.": "请尝试搜索其他文件或关键词。",
     "Turn a Retroflag GPi Case 2 (Raspberry Pi CM4, Lakka) into a native Bluetooth DualShock 4 controller for macOS - no host software": "将 Retroflag GPi Case 2（Raspberry Pi CM4，Lakka）变身为适用于 macOS 的原生蓝牙 DualShock 4 手柄——无需主机端软件",
     "Uint16Array to Float16 Decoder": "Uint16Array 到 Float16 解码器",
@@ -262,23 +255,61 @@
     "web crawler in ruby": "Ruby 编写的网络爬虫",
     "web dash board for performance": "用于性能监控的 Web 仪表盘",
     "windump and tcpdump visualizer": "windump 和 tcpdump 可视化工具",
-    "{count} file": "{count}个文件",
-    "{count} files": "{count}个文件",
-    "{count} followers": "{count}位关注者",
-    "{count} fork of this repo": "该仓库已有 {count} 个复刻",
-    "{count} forks": "{count}个复刻",
-    "{count} forks hidden": "隐藏了 {count} 个复刻",
-    "{count} forks of this repo": "该仓库有 {count} 个复刻",
-    "{count} non-forks": "{count}非复刻项目",
-    "{count} project": "{count}个项目",
-    "{count} projects": "{count}个项目",
-    "{count} public gist": "{count}个公开的 Gist",
-    "{count} public gists": "{count}个公开的Gist",
-    "{count} public repos": "{count}个公开仓库",
-    "{count} star": "{count}个星标",
-    "{count} stars": "{count}个星标",
     "{login} avatar": "{login}的头像",
     "{user} — Projects": "{user} — 项目"
+  },
+  "plurals": {
+    "Filter projects by #{tag} ({count} projects)": {
+      "other": "按 #{tag} 筛选项目（{count}个项目）"
+    },
+    "Show 5 more of {count} loaded gists": {
+      "other": "显示已加载的{count}个 Gist 中的另外 5 个"
+    },
+    "Show all {count} tags": {
+      "other": "显示全部{count}个标签"
+    },
+    "Showing {shown} of {count} public gists": {
+      "other": "显示{shown}个（共{count}个）公开的Gist"
+    },
+    "Showing {shown} of {count} public repositories": {
+      "other": "显示{shown}个公开仓库（共{count}个）"
+    },
+    "Showing {shown} of {count} public repositories across tag clusters": {
+      "other": "在标签分组中展示{count}个公开仓库中的{shown}个"
+    },
+    "Showing {shown} of {count} public repositories · Tagged \"{tag}\"": {
+      "other": "显示 {shown} 个公开仓库（共 {count} 个）· 标签为“{tag}”"
+    },
+    "{count} files": {
+      "other": "{count}个文件"
+    },
+    "{count} followers": {
+      "other": "{count}位关注者"
+    },
+    "{count} forks": {
+      "other": "{count}个复刻"
+    },
+    "{count} forks hidden": {
+      "other": "隐藏了 {count} 个复刻"
+    },
+    "{count} forks of this repo": {
+      "other": "该仓库有 {count} 个复刻"
+    },
+    "{count} non-forks": {
+      "other": "{count}非复刻项目"
+    },
+    "{count} projects": {
+      "other": "{count}个项目"
+    },
+    "{count} public gists": {
+      "other": "{count}个公开的Gist"
+    },
+    "{count} public repos": {
+      "other": "{count}个公开仓库"
+    },
+    "{count} stars": {
+      "other": "{count}个星标"
+    }
   },
   "tags": {
     "6dof": "6dof",

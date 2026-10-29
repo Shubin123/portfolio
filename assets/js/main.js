@@ -467,7 +467,7 @@ function renderGists() {
 
   if (els.gistsBadge) {
     if (total > 0) {
-      els.gistsBadge.textContent = total.toLocaleString();
+      els.gistsBadge.textContent = formatNumber(total);
       els.gistsBadge.hidden = false;
     } else {
       els.gistsBadge.hidden = true;
@@ -481,7 +481,7 @@ function renderGists() {
     if (filtered.length === 0) {
       els.gistsStatus.textContent = t('No gists match "{query}".', { query });
     } else {
-      els.gistsStatus.textContent = t("Showing {shown} of {total} public gists", { shown: filtered.length, total: total.toLocaleString() });
+      els.gistsStatus.textContent = plural(total, "Showing {shown} of {count} public gist", "Showing {shown} of {count} public gists", { shown: filtered.length });
     }
   } else {
     els.gistsStatus.textContent = total
@@ -549,7 +549,7 @@ function updateMoreBtn(totalItems, query) {
   if (state.gistsLimit < totalItems) {
     const remaining = totalItems - state.gistsLimit;
     btn.textContent = t("Show more ({count} more)", { count: Math.min(5, remaining) });
-    btn.title = t("Show 5 more of {total} loaded gists", { total: totalItems });
+    btn.title = plural(totalItems, "Show 5 more of {count} loaded gist", "Show 5 more of {count} loaded gists");
   } else {
     btn.textContent = t("Show less");
     btn.title = t("Collapse back to latest {count} gists", { count: DEFAULT_GISTS_TO_SHOW });
@@ -570,12 +570,12 @@ function renderRepoStats() {
   const repos = publicRepos();
   const forks = repos.filter((repo) => repo.fork).length;
   const stats = state.reposLoaded ? [
-    [repos.length, t("{count} public repos", { count: repos.length.toLocaleString() })],
-    [repos.length - forks, t("{count} non-forks", { count: (repos.length - forks).toLocaleString() })],
-    [forks, t("{count} forks", { count: forks.toLocaleString() })],
+    [repos.length, plural(repos.length, "{count} public repo", "{count} public repos")],
+    [repos.length - forks, plural(repos.length - forks, "{count} non-fork", "{count} non-forks")],
+    [forks, plural(forks, "{count} fork", "{count} forks")],
   ] : [];
   if (Number.isFinite(state.profile?.followers)) {
-    stats.push([state.profile.followers, t("{count} followers", { count: state.profile.followers.toLocaleString() })]);
+    stats.push([state.profile.followers, plural(state.profile.followers, "{count} follower", "{count} followers")]);
   }
   for (const [, label] of stats) {
     const pill = document.createElement("span");
@@ -743,16 +743,17 @@ function render() {
   const repos = publicRepos();
   const forks = repos.filter((repo) => repo.fork).length;
 
-  const counts = { shown: filtered.length, total: repos.length };
+  const total = repos.length;
+  const shown = { shown: filtered.length };
   let countText;
   if (state.activeTag) {
-    countText = t('Showing {shown} of {total} public repositories · Tagged "{tag}"', { ...counts, tag: tagLabel(state.activeTag) });
+    countText = plural(total, 'Showing {shown} of {count} public repository · Tagged "{tag}"', 'Showing {shown} of {count} public repositories · Tagged "{tag}"', { ...shown, tag: tagLabel(state.activeTag) });
   } else if (state.clusterView) {
-    countText = t("Showing {shown} of {total} public repositories across tag clusters", counts);
+    countText = plural(total, "Showing {shown} of {count} public repository across tag clusters", "Showing {shown} of {count} public repositories across tag clusters", shown);
   } else {
-    countText = t("Showing {shown} of {total} public repositories", counts);
+    countText = plural(total, "Showing {shown} of {count} public repository", "Showing {shown} of {count} public repositories", shown);
   }
-  if (!state.showForks && forks) countText += ` · ${t("{count} forks hidden", { count: forks })}`;
+  if (!state.showForks && forks) countText += ` · ${plural(forks, "{count} fork hidden", "{count} forks hidden")}`;
   els.count.textContent = countText;
 
   if (filtered.length === 0) {
@@ -862,7 +863,7 @@ function renderTagBar() {
     btn.className = `tag-pill${isActive ? " is-active" : ""}`;
     btn.setAttribute("aria-pressed", String(isActive));
     btn.setAttribute("data-tag", tag);
-    btn.setAttribute("aria-label", t("Filter projects by #{tag} ({count} projects)", { tag: tagLabel(tag), count }));
+    btn.setAttribute("aria-label", plural(count, "Filter projects by #{tag} ({count} project)", "Filter projects by #{tag} ({count} projects)", { tag: tagLabel(tag) }));
 
     const label = document.createElement("span");
     label.textContent = `#${tagLabel(tag)}`;
@@ -891,7 +892,7 @@ function renderTagBar() {
     } else {
       const remaining = sortedTags.length - visibleTags.length;
       moreBtn.textContent = t("+{count} more", { count: remaining });
-      moreBtn.title = t("Show all {count} tags", { count: sortedTags.length });
+      moreBtn.title = plural(sortedTags.length, "Show all {count} tag", "Show all {count} tags");
     }
     moreBtn.addEventListener("click", () => {
       state.tagsExpanded = !state.tagsExpanded;

@@ -1,18 +1,23 @@
-// English is the page's source language. Other languages are dictionaries keyed
-// by the English text, built ahead of time by scripts/translate.py with DeepL,
-// so the DeepL key never reaches the browser. Anything a dictionary is missing
-// (e.g. a repo created since the last translation run) falls back to English.
+// English is the page's source language. Every other language is a dictionary
+// keyed by the English text, built ahead of time by scripts/translate.py with
+// DeepL, so the DeepL key never reaches the browser. TRANSLATIONS (generated into
+// languages.js) lists them. A dictionary is downloaded only when a visitor picks
+// its language, then kept in memory and in localStorage until its version
+// changes. Anything a dictionary is missing (e.g. a repo created since the last
+// translation run) falls back to English.
 const LANGUAGES = {
-  en: { label: "English", htmlLang: "en", locale: "en" },
-  zh: { label: "中文（简体）", short: "中文", htmlLang: "zh-CN", locale: "zh-CN", url: "assets/i18n/zh.json" },
+  en: { label: "English", htmlLang: "en" },
+  ...(typeof TRANSLATIONS === "object" ? TRANSLATIONS : {}),
 };
 const DEFAULT_LANGUAGE = "en";
 const LANGUAGE_STORAGE_KEY = "gh-portfolio-lang";
+const DICTIONARY_CACHE_PREFIX = "gh-portfolio-i18n:";
 
 const i18n = {
   lang: DEFAULT_LANGUAGE,
-  dict: null, // { strings, tags } for i18n.lang, null for English
+  dict: null, // { version, strings, plurals, tags } for i18n.lang, null for English
   dicts: {},
+  pluralRules: {},
   request: 0,
   staticSources: new Map(),
   onChange: () => {},
@@ -22,13 +27,33 @@ const i18n = {
 // the string-literal arguments of t() and plural() calls, so keep UI strings as
 // literals at the call site.
 function t(source, vars) {
-  const template = (i18n.dict && i18n.dict.strings[source]) || source;
-  if (!vars) return template;
-  return template.replace(/\{(\w+)\}/g, (match, name) => (name in vars ? String(vars[name]) : match));
+  return fill((i18n.dict && i18n.dict.strings[source]) || source, vars);
 }
 
+// Dictionaries hold a form for each plural category of their language (Russian
+// has three, Chinese one); English and untranslated text use one/other.
 function plural(count, one, other, vars = {}) {
-  return t(count === 1 ? one : other, { count: count.toLocaleString(), ...vars });
+  const forms = i18n.dict && i18n.dict.plurals[other];
+  const template = (forms && (forms[pluralCategory(count)] || forms.other)) || (count === 1 ? one : other);
+  return fill(template, { ...vars, count });
+}
+
+function fill(template, vars) {
+  if (!vars) return template;
+  return template.replace(/\{(\w+)\}/g, (match, name) => {
+    if (!(name in vars)) return match;
+    return typeof vars[name] === "number" ? formatNumber(vars[name]) : String(vars[name]);
+  });
+}
+
+function formatNumber(value) {
+  return value.toLocaleString(currentLocale());
+}
+
+function pluralCategory(count) {
+  const locale = currentLocale();
+  i18n.pluralRules[locale] ||= new Intl.PluralRules(locale);
+  return i18n.pluralRules[locale].select(count);
 }
 
 function tagLabel(tag) {
@@ -36,7 +61,7 @@ function tagLabel(tag) {
 }
 
 function currentLocale() {
-  return LANGUAGES[i18n.lang].locale;
+  return LANGUAGES[i18n.lang].htmlLang;
 }
 
 function normalizeText(text) {
@@ -61,25 +86,22 @@ function initLanguage(onChange) {
   } catch {
     // Storage unavailable — stay on the default language.
   }
+  // A cached dictionary applies synchronously, before the first render.
   if (saved && saved !== DEFAULT_LANGUAGE && LANGUAGES[saved]) setLanguage(saved, { persist: false });
 }
 
 async function setLanguage(lang, { persist = true } = {}) {
-  if (!LANGUAGES[lang]) return;
-  const request = ++i18n.request;
   const config = LANGUAGES[lang];
+  if (!config) return;
+  const request = ++i18n.request;
   let dict = null;
 
-  if (config.url) {
-    dict = i18n.dicts[lang];
+  if (lang !== DEFAULT_LANGUAGE) {
+    dict = i18n.dicts[lang] || readCachedDictionary(lang);
     if (!dict) {
       setLanguageBusy(true);
       try {
-        const res = await fetch(config.url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        dict = { strings: data.strings || {}, tags: data.tags || {} };
-        i18n.dicts[lang] = dict;
+        dict = await downloadDictionary(lang);
       } catch {
         if (request === i18n.request) {
           setLanguageBusy(false);
@@ -88,6 +110,7 @@ async function setLanguage(lang, { persist = true } = {}) {
         return;
       }
     }
+    i18n.dicts[lang] = dict;
   }
   if (request !== i18n.request) return; // a later choice won the race
 
@@ -107,6 +130,32 @@ async function setLanguage(lang, { persist = true } = {}) {
   i18n.onChange();
 }
 
+// The version is a hash of the dictionary, so a stored copy is good until
+// translate.py publishes a different one.
+function readCachedDictionary(lang) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(DICTIONARY_CACHE_PREFIX + lang));
+    if (cached && cached.version === LANGUAGES[lang].version) return cached;
+  } catch {
+    // Storage unavailable or corrupt — download instead.
+  }
+  return null;
+}
+
+async function downloadDictionary(lang) {
+  const { version } = LANGUAGES[lang];
+  const res = await fetch(`assets/i18n/${lang}.json?v=${version}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const dict = { version, strings: data.strings || {}, plurals: data.plurals || {}, tags: data.tags || {} };
+  try {
+    localStorage.setItem(DICTIONARY_CACHE_PREFIX + lang, JSON.stringify(dict));
+  } catch {
+    // Storage full or unavailable — the dictionary still applies to this visit.
+  }
+  return dict;
+}
+
 function applyStaticTranslations() {
   for (const [el, source] of i18n.staticSources) {
     if (source.text !== null) el.textContent = t(source.text);
@@ -119,14 +168,29 @@ function languageMenuEls() {
     toggle: document.getElementById("lang-toggle"),
     current: document.getElementById("lang-current"),
     options: document.getElementById("lang-options"),
+    list: document.getElementById("lang-list"),
     note: document.getElementById("lang-note"),
     items: [...document.querySelectorAll("#lang-options [data-lang]")],
   };
 }
 
 function bindLanguageMenu() {
-  const { toggle, options, items } = languageMenuEls();
-  if (!toggle || !options) return;
+  const { toggle, options, list } = languageMenuEls();
+  if (!toggle || !options || !list) return;
+
+  list.replaceChildren(...Object.entries(LANGUAGES).map(([code, config]) => {
+    const item = document.createElement("li");
+    item.setAttribute("role", "none");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "menuitemradio");
+    button.dataset.lang = code;
+    button.lang = config.htmlLang;
+    button.textContent = config.label;
+    item.appendChild(button);
+    return item;
+  }));
+  const { items } = languageMenuEls();
 
   toggle.addEventListener("click", () => {
     setLanguageMenuOpen(options.hidden);
@@ -148,6 +212,9 @@ function bindLanguageMenu() {
         e.preventDefault();
         const step = e.key === "ArrowDown" ? 1 : -1;
         items[(index + step + items.length) % items.length].focus();
+      } else if (e.key === "Home" || e.key === "End") {
+        e.preventDefault();
+        items[e.key === "Home" ? 0 : items.length - 1].focus();
       }
     });
   });
@@ -180,5 +247,5 @@ function renderLanguageMenu(noteOverride) {
   const config = LANGUAGES[i18n.lang];
   if (current) current.textContent = config.short || config.label;
   items.forEach((item) => item.setAttribute("aria-checked", String(item.dataset.lang === i18n.lang)));
-  if (note) note.textContent = noteOverride || t("Chinese translation by DeepL");
+  if (note) note.textContent = noteOverride || t("Translations by DeepL");
 }

@@ -49,11 +49,9 @@
             </svg>
           </button>
           <div class="lang-popover" id="lang-options" hidden>
-            <ul class="lang-options" role="menu" aria-label="Language" data-i18n-attr="aria-label">
-              <li role="none"><button type="button" role="menuitemradio" data-lang="en" lang="en" aria-checked="true">English</button></li>
-              <li role="none"><button type="button" role="menuitemradio" data-lang="zh" lang="zh-CN" aria-checked="false">中文（简体）</button></li>
-            </ul>
-            <p class="lang-note" id="lang-note">Chinese translation by DeepL</p>
+            <!-- i18n.js fills this from LANGUAGES. -->
+            <ul class="lang-options" id="lang-list" role="menu" aria-label="Language" data-i18n-attr="aria-label"></ul>
+            <p class="lang-note" id="lang-note">Translations by DeepL</p>
           </div>
         </div>
         <a id="profile-link" class="github-link" href="https://github.com/Shubin123" target="_blank" rel="noopener noreferrer">
@@ -199,6 +197,7 @@
   </footer>
 
   <script src="assets/js/icons.js" defer></script>
+  <script src="assets/js/languages.js" defer></script>
   <script src="assets/js/i18n.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </body>

@@ -12,7 +12,7 @@ ones, with nothing to keep in sync.
 - `assets/css/style.css` — styling, including a dark theme that follows the visitor's OS preference and responsive pane transitions.
 - `assets/js/main.js` — fetches GitHub repositories, profile, and gists on load, then handles interactive sorting, tag-based clustering, live filtering, and widget pulldown client-side.
 - `assets/icons/*.svg` + `assets/js/icons.js` — one mark per project (see below).
-- `assets/js/i18n.js` + `assets/i18n/zh.json` — the translate menu and its DeepL-built Chinese dictionary (see below).
+- `assets/js/i18n.js` + `assets/i18n/*.json` — the translate menu and its DeepL-built dictionaries, listed in the generated `assets/js/languages.js` (see below).
 
 The header counts a repository once: **public repos = non-forks + forks**, all
 three read off the same list the grid renders, so the total never disagrees with
@@ -28,29 +28,43 @@ Projects are tagged and clustered by domain (such as AI, graphics, robotics, too
 - **Cluster by tag mode**: The "Cluster by tag" toggle organizes projects into categorized cluster sections complete with section headers and count badges.
 
 
-## Chinese translation (DeepL)
+## Translations (DeepL)
 
-The translate button in the header opens a language menu: English (the source)
-or 中文（简体）. The choice is remembered per visitor. Everything is translated —
-static markup, status lines, counts, and tooltips, plus the live GitHub text:
-the profile bio, repo descriptions, the latest 100 gist descriptions, and tags.
+The translate button in the header opens a language menu: English (the source),
+Deutsch, Español, Français, Português (Brasil), Русский, 日本語, 한국어, and 中文（简体）
+— the languages GitHub publishes its own docs in. The choice is remembered per
+visitor. Everything is translated — static markup, status lines, counts, and
+tooltips, plus the live GitHub text: the profile bio, repo descriptions, the
+latest 100 gist descriptions, and tags.
 
 DeepL keys can't be used from a browser, so the page never calls DeepL.
-`scripts/translate.py` does it ahead of time and writes `assets/i18n/zh.json`, a
-dictionary keyed by the English text; the page downloads it only when a visitor
-picks Chinese. It collects UI strings from elements marked `data-i18n` /
-`data-i18n-attr` and from string literals passed to `t()` / `plural()` in the JS,
-fetches the same public GitHub data the page shows, and only sends text that
-isn't already in the dictionary. A glossary keeps GitHub's own Chinese terms
-(复刻, 星标, 仓库, Gist).
+`scripts/translate.py` does it ahead of time and writes one dictionary per
+language, `assets/i18n/<code>.json`, keyed by the English text. It collects UI
+strings from elements marked `data-i18n` / `data-i18n-attr` and from string
+literals passed to `t()` / `plural()` in the JS, fetches the same public GitHub
+data the page shows, and only sends text that isn't already translated.
+Per-language glossaries keep GitHub's own terms (e.g. 复刻, 星标, 仓库 in Chinese).
+
+Each dictionary is lazy-loaded and cached: the page downloads one only when a
+visitor picks that language, keeps it in memory for switching back, and stores
+it in `localStorage` so later visits apply it without the network.
+`assets/js/languages.js`, also generated, gives every dictionary a content hash;
+the hash is the cache key and the download's `?v=`, so a cached copy is replaced
+as soon as the script publishes a new one.
+
+Counts use each language's plural rules (`Intl.PluralRules`): the script
+translates a form per plural category, so Russian reads 1 файл / 3 файла /
+25 файлов and French treats 0 as singular.
 
 ```sh
-DEEPL_AUTH_KEY=... npm run translate   # translate what's new; add -- --all to redo everything
-npm run check:i18n                     # offline: fail if any UI string lacks a translation
+DEEPL_AUTH_KEY=... npm run translate                 # translate what's new; add -- --all to redo everything
+DEEPL_AUTH_KEY=... npm run translate -- --lang fr,de # only some languages
+npm run check:i18n                                   # offline: fail if any UI string lacks a translation
 ```
 
-A repo or gist published after the last run shows in English until the script
-runs again.
+To add a language, add it to `LANGUAGES` in `scripts/translate.py` and run the
+script. A repo or gist published after the last run shows in English until the
+script runs again.
 
 ## Project marks
 

@@ -290,6 +290,14 @@ body:lang(zh) {
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+body:lang(ja) {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, "Noto Sans CJK JP", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body:lang(ko) {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 .section-heading {
   margin: 8px 0 28px;
 }
@@ -366,8 +374,9 @@ body:lang(zh) {
 
 .gists-heading-row {
   display: flex;
+  flex-wrap: wrap; /* a longer translated heading pushes the badge down instead of under the arrow */
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
 }
 
 .gists-widget h2 {
