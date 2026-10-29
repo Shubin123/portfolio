@@ -9,23 +9,23 @@ const TRANSLATIONS = {
   "es": {
     "label": "Español",
     "htmlLang": "es",
-    "version": "4e13c6ffa5b4"
+    "version": "9cb301813e16"
   },
   "fr": {
     "label": "Français",
     "htmlLang": "fr",
-    "version": "2c870028197d"
+    "version": "c06718b6a477"
   },
   "pt-BR": {
     "label": "Português (Brasil)",
     "short": "Português",
     "htmlLang": "pt-BR",
-    "version": "5f9007517e6b"
+    "version": "191bb5742f12"
   },
   "ru": {
     "label": "Русский",
     "htmlLang": "ru",
-    "version": "d1cfcbacc436"
+    "version": "8fbab1d4d8e0"
   },
   "ja": {
     "label": "日本語",
