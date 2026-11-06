@@ -1,7 +1,8 @@
 name: live
 
-# Checks the real deployments: every project site's mark, and that
-# https://shubin123.github.io/ still lands on the portfolio.
+# Checks the real deployments: every project site's mark, that
+# https://shubin123.github.io/ still lands on the portfolio, and that
+# shubinwang.com serves every project site.
 on:
   push:
     branches: [main]
@@ -23,3 +24,6 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:live
+        env:
+          # The repo list is read from the API; a token keeps it off the shared runner IP's limit.
+          GITHUB_TOKEN: ${{ github.token }}

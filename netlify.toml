@@ -3,3 +3,11 @@
   to = "https://shubin123.github.io/kokorojs/:splat"
   status = 200
   force = true
+
+# Every project's Pages site is also at shubinwang.com/<repo>/, so a new one
+# shows up here with no edits. Not forced, so this site's own files win, and
+# netlify/edge-functions/project-slash.js adds the slash a bare /<repo> lacks.
+[[redirects]]
+  from = "/:repo/*"
+  to = "https://shubin123.github.io/:repo/:splat"
+  status = 200

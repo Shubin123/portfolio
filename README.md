@@ -98,7 +98,8 @@ relationships above, cache/late-response races, icon integrity, Pages links,
 the grid's column growth from phone width to 2560px, and a fork served from
 another account's Pages address showing that account. `npm run test:live` is the
 opt-in network check described above. It also checks that
-`https://shubin123.github.io/` still redirects to the portfolio.
+`https://shubin123.github.io/` still redirects to the portfolio, and that
+`https://shubinwang.com/` serves every project site (see below).
 
 GitHub Actions run both: `e2e` (icons and the local suite) on every pull
 request and, after `translate`, every push to `main`; and `live` on every push
@@ -188,3 +189,21 @@ python3 -m http.server 8000
 No further deploys are needed when you add new repos — the page fetches live
 on every visit. A brand-new repo shows the fallback mark until it gets its own
 entry in `scripts/generate-icons.py`.
+
+## Custom domain (shubinwang.com)
+
+Netlify serves this repo at `https://shubinwang.com/` and also deploys it from
+`main`. `netlify.toml` proxies every other path to GitHub Pages, so each
+project's Pages site is at `https://shubinwang.com/<repo>/` too (for example
+[shubinwang.com/midi/](https://shubinwang.com/midi/)). The address bar stays
+on shubinwang.com. A new Pages site shows up there as soon as GitHub publishes
+it, with no edits here.
+
+- The rule isn't forced, so the portfolio's own files (`index.html`,
+  `assets/…`) take precedence over the proxy.
+- `/tts/` is an alias for `kokorojs`.
+- `netlify/edge-functions/project-slash.js` redirects a bare `/<repo>` to
+  `/<repo>/`. Project pages load their files by relative path, so they need the
+  slash. A redirect rule can't add it because Netlify treats `/midi` and
+  `/midi/` as the same path.
+- A path with no Pages site behind it gets GitHub's 404 page.
